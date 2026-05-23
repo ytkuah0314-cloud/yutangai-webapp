@@ -152,7 +152,10 @@
       <!-- BOSS + 等级 -->
       <div class="card" style="padding:20px">
         <div class="savings-display">
-          <span class="savings-amount" id="savings-amt">—</span>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="savings-amount" id="savings-amt">RM ••••••</span>
+            <button id="savings-eye-btn" onclick="toggleSavingsVisibility()" style="background:none;border:none;cursor:pointer;padding:2px;color:var(--text-3);line-height:1;opacity:.75;flex-shrink:0" title="显示/隐藏总存款"></button>
+          </div>
           <span class="savings-label">总存款</span>
         </div>
         <div class="boss-title">
@@ -634,7 +637,9 @@ async function loadGamification() {
   const savings = row ? parseFloat(row.balance) : 0;
 
   const pct = Math.min(savings / 100000, 1);
-  setMasked('savings-amt', savings);
+  const savEl = document.getElementById('savings-amt');
+  savEl.dataset.savingsRaw = savings;
+  _refreshSavingsDisplay();
   document.getElementById('boss-hp').style.width = ((1 - pct) * 100).toFixed(1) + '%';
   setMasked('boss-dmg', pct, 'boss-dmg');
   setMasked('boss-hp-left', savings, 'boss-left');
@@ -714,6 +719,27 @@ function triggerMilestone(amount) {
   setTimeout(()=>banner.remove(),4500);
 }
 
+// ── 总存款 本地显示/隐藏 ─────────────────────────
+let _savingsHidden = localStorage.getItem('yutang-savings-hidden') !== '0';
+
+const _EYE_OPEN  = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+const _EYE_CLOSE = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+
+function _refreshSavingsDisplay() {
+  const el  = document.getElementById('savings-amt');
+  const btn = document.getElementById('savings-eye-btn');
+  if (!el) return;
+  const raw = parseFloat(el.dataset.savingsRaw) || 0;
+  el.textContent = _savingsHidden ? 'RM ••••••' : fmtAmt(raw);
+  if (btn) btn.innerHTML = _savingsHidden ? _EYE_CLOSE : _EYE_OPEN;
+}
+
+function toggleSavingsVisibility() {
+  _savingsHidden = !_savingsHidden;
+  localStorage.setItem('yutang-savings-hidden', _savingsHidden ? '1' : '0');
+  _refreshSavingsDisplay();
+}
+
 // 数字滚动动画（遮罩感知版）
 function animateNumber(el,to,dur=700){
   el.dataset.rawAmt = to;
@@ -730,6 +756,8 @@ function animateNumber(el,to,dur=700){
 }
 
 window.__reload=()=>{load();loadGamification();};
+// 页面加载时立即设置眼睛图标（数据未到之前也能显示）
+(()=>{const btn=document.getElementById('savings-eye-btn');if(btn)btn.innerHTML=_savingsHidden?_EYE_CLOSE:_EYE_OPEN;})();
 init();
 
 // Tooltip — fixed 定位跳出父层 overflow:hidden，JS 动态算坐标
