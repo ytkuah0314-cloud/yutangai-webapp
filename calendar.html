@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>日历视图 · YuTangAi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🐟</div>
+    <span class="logo-name">YuTangAi</span>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="add.html">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="3.5" width="14" height="11" rx="2"/><path d="M5.5 3.5V2M11.5 3.5V2M1.5 7h14M6 11h2m3 0h-2m0 0v-2m0 2v2"/></svg>
+      资产
+    </a>
+    <a href="index.html">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="10" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="10" width="6" height="6" rx="1.5"/><rect x="10" y="10" width="6" height="6" rx="1.5"/></svg>
+      仪表板
+    </a>
+    <a href="calendar.html">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1.5" y="3" width="14" height="12.5" rx="2"/><line x1="1.5" y1="7" x2="15.5" y2="7"/><line x1="5.5" y1="1" x2="5.5" y2="5"/><line x1="11.5" y1="1" x2="11.5" y2="5"/></svg>
+      月度
+    </a>
+    <a href="year.html">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="3" width="14" height="12.5" rx="2"/><line x1="1.5" y1="7" x2="15.5" y2="7"/><line x1="5.5" y1="1" x2="5.5" y2="5"/><line x1="11.5" y1="1" x2="11.5" y2="5"/><line x1="4" y1="10.5" x2="9.5" y2="10.5"/><line x1="4" y1="13" x2="13" y2="13"/></svg>
+      年度
+    </a>
+    <a href="records.html">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="3" y1="4.5" x2="14" y2="4.5"/><line x1="3" y1="8.5" x2="14" y2="8.5"/><line x1="3" y1="12.5" x2="10" y2="12.5"/></svg>
+      流水
+    </a>
+    <a href="annual.html">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,13 6.5,8 10,11 15,5"/><polyline points="11,5 15,5 15,9"/></svg>
+      薪水
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="theme-toggle" onclick="toggleTheme()">
+      <span class="toggle-icon" id="theme-icon">🌙</span>
+      <span class="toggle-label" id="theme-label">浅色模式</span>
+    </button>
+  </div>
+</aside>
+
+<nav class="bottom-nav">
+  <a href="add.html"><span class="nav-icon-wrap">💳</span>资产</a>
+  <a href="index.html"><span class="nav-icon-wrap">📊</span>仪表板</a>
+  <a href="calendar.html"><span class="nav-icon-wrap">📅</span>月度</a>
+  <a href="year.html"><span class="nav-icon-wrap">📆</span>年度</a>
+  <a href="records.html"><span class="nav-icon-wrap">📋</span>流水</a>
+  <a href="annual.html"><span class="nav-icon-wrap">📈</span>薪水</a>
+</nav>
+
+<main class="main">
+  <div class="month-nav">
+    <button onclick="changeMonth(-1)">‹</button>
+    <div class="month-label" id="month-label">—</div>
+    <button onclick="changeMonth(1)">›</button>
+  </div>
+
+  <div class="card">
+    <div class="cal-week-headers">
+      <div class="cal-header">一</div><div class="cal-header">二</div>
+      <div class="cal-header">三</div><div class="cal-header">四</div>
+      <div class="cal-header">五</div><div class="cal-header">六</div>
+      <div class="cal-header">日</div>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+  </div>
+
+  <div class="card" style="padding:0 20px" id="day-detail" hidden>
+    <h2 id="day-title" style="padding-top:20px"></h2>
+    <ul class="tx-list" id="day-list"></ul>
+  </div>
+
+  <div class="card ai-analysis-card" style="padding:20px">
+    <div class="ai-badge">🤖 AI消费分析</div>
+    <div id="ai-content">
+      <div class="skeleton skeleton-line" style="height:14px;width:90%;border-radius:6px;margin-bottom:10px"></div>
+      <div class="skeleton skeleton-line" style="height:14px;width:75%;border-radius:6px;margin-bottom:10px"></div>
+      <div class="skeleton skeleton-line" style="height:14px;width:60%;border-radius:6px"></div>
+    </div>
+  </div>
+</main>
+
+<div id="toast"></div>
+<script src="app.js"></script>
+<script src="modal.js"></script>
+<script>
+let year, month, allData = {};
+
+function init() {
+  const now = new Date();
+  year  = now.getFullYear();
+  month = now.getMonth() + 1;
+
+  const savedYear  = localStorage.getItem('cal_year');
+  const savedMonth = localStorage.getItem('cal_month');
+  if (savedYear && savedMonth) {
+    year  = +savedYear;
+    month = +savedMonth;
+    localStorage.removeItem('cal_year');
+    localStorage.removeItem('cal_month');
+  }
+
+  load();
+}
+
+function changeMonth(delta) {
+  month += delta;
+  if (month > 12) { month = 1; year++; }
+  if (month < 1)  { month = 12; year--; }
+  load();
+}
+
+async function load() {
+  document.getElementById('month-label').textContent = fmtMonth(year, month);
+  const from = `${year}-${String(month).padStart(2,'0')}-01`;
+  const to   = new Date(year, month, 0).toISOString().slice(0,10);
+
+  const prevY = month === 1 ? year - 1 : year;
+  const prevM = month === 1 ? 12 : month - 1;
+  const prevFrom = `${prevY}-${String(prevM).padStart(2,'0')}-01`;
+  const prevTo   = new Date(prevY, prevM, 0).toISOString().slice(0,10);
+
+  const [curRes, prevRes] = await Promise.all([
+    db.from('transactions').select('*').gte('date', from).lte('date', to),
+    db.from('transactions').select('*').gte('date', prevFrom).lte('date', prevTo),
+  ]);
+  if (curRes.error) { showToast('❌ 加载失败：' + curRes.error.message); return; }
+
+  allData = {};
+  (curRes.data || []).forEach(r => {
+    if (!allData[r.date]) allData[r.date] = [];
+    allData[r.date].push(r);
+  });
+
+  renderCalendar();
+  generateAIAnalysis(curRes.data || [], prevRes.data || []);
+}
+
+function renderCalendar() {
+  const grid    = document.getElementById('cal-grid');
+  const today   = new Date().toISOString().slice(0,10);
+  const firstDow = new Date(year, month-1, 1).getDay();
+  const daysInMonth = new Date(year, month, 0).getDate();
+
+  const offset = (firstDow === 0) ? 6 : firstDow - 1;
+  let cells = '';
+
+  for (let i = 0; i < offset; i++) {
+    cells += '<div class="cal-cell other-month"></div>';
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const rows    = allData[dateStr] || [];
+    const inc     = rows.filter(r => r.type === 'income').reduce((s,r) => s + +r.amount, 0);
+    const exp     = rows.filter(r => r.type === 'expense').reduce((s,r) => s + +r.amount, 0);
+    const isToday = dateStr === today ? ' today' : '';
+
+    cells += `
+      <div class="cal-cell${isToday}" onclick="showDay('${dateStr}')">
+        <div class="cal-day">${d}</div>
+        ${inc > 0 ? `<div class="cal-income">+${inc.toFixed(2)}</div>` : ''}
+        ${exp > 0 ? `<div class="cal-expense">-${exp.toFixed(2)}</div>` : ''}
+      </div>`;
+  }
+  grid.innerHTML = cells;
+}
+
+function showDay(dateStr) {
+  const rows   = allData[dateStr] || [];
+  const detail = document.getElementById('day-detail');
+  const title  = document.getElementById('day-title');
+  const list   = document.getElementById('day-list');
+
+  title.textContent = fmtDate(dateStr);
+  detail.hidden = false;
+
+  if (!rows.length) {
+    list.innerHTML = '<li class="empty">当天无记录</li>'; return;
+  }
+  list.innerHTML = rows.map(r => renderTxItem(r, { showDate: false })).join('');
+
+  detail.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+window.__reload = load;
+init();
+
+// ── AI 消费分析 ──────────────────────────────────
+function generateAIAnalysis(curRows, prevRows) {
+  const wrap = document.getElementById('ai-content');
+
+  const curExp  = curRows.filter(r => r.type === 'expense');
+  const prevExp = prevRows.filter(r => r.type === 'expense');
+  const curInc  = curRows.filter(r => r.type === 'income');
+
+  const curTotal  = curExp.reduce((s, r) => s + +r.amount, 0);
+  const prevTotal = prevExp.reduce((s, r) => s + +r.amount, 0);
+  const curIncTotal = curInc.reduce((s, r) => s + +r.amount, 0);
+
+  if (!curRows.length) {
+    wrap.innerHTML = '<div class="ai-text"><p style="color:var(--text-3)">本月暂无记录，先记几笔再来看分析吧！✨</p></div>';
+    return;
+  }
+
+  function groupByCat(rows) {
+    const m = {};
+    rows.forEach(r => { m[r.category] = (m[r.category] || 0) + +r.amount; });
+    return m;
+  }
+
+  const curCats  = groupByCat(curExp);
+  const prevCats = groupByCat(prevExp);
+  const sorted   = Object.entries(curCats).sort((a, b) => b[1] - a[1]);
+
+  const paras = [];
+
+  // 1. 总体评价
+  if (prevTotal > 0) {
+    const diff = curTotal - prevTotal;
+    if (diff < -0.005) {
+      paras.push(`💚 本月总支出 <span class="ai-good">${fmtAmt(curTotal)}</span>，比上月节省了 <span class="ai-good">${fmtAmt(-diff)}</span>，控制得不错！👍`);
+    } else if (diff > 0.005) {
+      paras.push(`本月总支出 <span class="ai-warn">${fmtAmt(curTotal)}</span>，比上月多了 <span class="ai-warn">${fmtAmt(diff)}</span>，下个月注意控制一下。`);
+    } else {
+      paras.push(`本月总支出 <span class="ai-cyan">${fmtAmt(curTotal)}</span>，与上月基本持平。`);
+    }
+  } else {
+    paras.push(`本月总支出 <span class="ai-cyan">${fmtAmt(curTotal)}</span>。`);
+  }
+
+  // 2. 类别变化对比（变化超过 RM50 的类别）
+  if (prevTotal > 0) {
+    const allCats = new Set([...Object.keys(curCats), ...Object.keys(prevCats)]);
+    const changes = [];
+    allCats.forEach(cat => {
+      const cur  = curCats[cat]  || 0;
+      const prev = prevCats[cat] || 0;
+      const diff = cur - prev;
+      if (Math.abs(diff) >= 50) changes.push({ cat, cur, diff });
+    });
+    changes.sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff));
+    const lines = changes.slice(0, 3).map(c =>
+      c.diff < 0
+        ? `<span class="ai-good">${c.cat} ${fmtAmt(c.cur)}，比上月减少 ${fmtAmt(-c.diff)} ✅</span>`
+        : `<span class="ai-warn">${c.cat} ${fmtAmt(c.cur)}，比上月增加 ${fmtAmt(c.diff)} ⚠️</span>`
+    );
+    if (lines.length) paras.push(lines.join('；'));
+  }
+
+  // 3. 消费习惯洞察：花费最多的前3类
+  if (sorted.length) {
+    const top3 = sorted.slice(0, 3).map(([cat, amt]) => {
+      const pct = curTotal > 0 ? Math.round(amt / curTotal * 100) : 0;
+      return `${cat}(${pct}%)`;
+    }).join(' &gt; ');
+    paras.push(`📊 花费最多的三类：<span class="ai-cyan">${top3}</span>`);
+  }
+
+  // 4. 本月亮点：比上月节省超过 20% 且金额超过 RM50
+  const highlights = [];
+  Object.keys(prevCats).forEach(cat => {
+    const prev = prevCats[cat] || 0;
+    const cur  = curCats[cat]  || 0;
+    const saved = prev - cur;
+    if (prev > 0 && saved / prev >= 0.2 && saved >= 50) {
+      highlights.push({ cat, saved });
+    }
+  });
+  if (highlights.length) {
+    paras.push('🌟 本月亮点：' + highlights.map(h =>
+      `${h.cat}控制优秀，比上月节省 <span class="ai-good">${fmtAmt(h.saved)}</span>`
+    ).join('；') + '！');
+  }
+
+  // 5. 需要注意：比上月多花超过 30% 且金额超过 RM50
+  const warnings = [];
+  Object.keys(prevCats).forEach(cat => {
+    const prev = prevCats[cat] || 0;
+    const cur  = curCats[cat]  || 0;
+    const added = cur - prev;
+    if (prev > 0 && added / prev >= 0.3 && added >= 50) {
+      const share = curTotal > 0 ? Math.round(cur / curTotal * 100) : 0;
+      warnings.push({ cat, added, share });
+    }
+  });
+  if (warnings.length) {
+    paras.push('⚠️ 注意：' + warnings.map(w =>
+      `${w.cat}支出比上月增加了 <span class="ai-warn">${fmtAmt(w.added)}</span>，占本月支出 ${w.share}%`
+    ).join('；'));
+  }
+
+  // 6. 储蓄建议
+  if (curIncTotal > 0) {
+    const rate = (curIncTotal - curTotal) / curIncTotal * 100;
+    if (rate >= 50) {
+      paras.push(`⚔️ 太棒了！本月储蓄率达到 <span class="ai-good">${rate.toFixed(0)}%</span>，墨疾又强大了一些！继续保持！`);
+    } else if (rate >= 30) {
+      paras.push(`💪 不错！本月储蓄率 <span class="ai-cyan">${rate.toFixed(0)}%</span>，继续保持这个节奏！`);
+    } else if (rate > 0) {
+      const worstCat = sorted[0]?.[0] || '支出';
+      paras.push(`💡 本月储蓄率 <span class="ai-amber">${rate.toFixed(0)}%</span>，支出偏高。下个月可以在${worstCat}方面多留意。`);
+    } else {
+      paras.push(`⚠️ 本月支出超过了收入，注意控制开支，墨疾需要更多粮草！`);
+    }
+  } else if (curTotal > 0) {
+    paras.push(`💡 本月有支出记录但没有收入记录，把收入也记上分析会更准确哦。`);
+  }
+
+  wrap.innerHTML = `<div class="ai-text">${paras.map(p => `<p>${p}</p>`).join('')}</div>`;
+}
+</script>
+</body>
+</html>

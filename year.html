@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>年度总览 · YuTangAi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🐟</div>
+    <span class="logo-name">YuTangAi</span>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="add.html">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="3.5" width="14" height="11" rx="2"/><path d="M5.5 3.5V2M11.5 3.5V2M1.5 7h14M6 11h2m3 0h-2m0 0v-2m0 2v2"/></svg>
+      资产
+    </a>
+    <a href="index.html">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="10" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="10" width="6" height="6" rx="1.5"/><rect x="10" y="10" width="6" height="6" rx="1.5"/></svg>
+      仪表板
+    </a>
+    <a href="calendar.html">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1.5" y="3" width="14" height="12.5" rx="2"/><line x1="1.5" y1="7" x2="15.5" y2="7"/><line x1="5.5" y1="1" x2="5.5" y2="5"/><line x1="11.5" y1="1" x2="11.5" y2="5"/></svg>
+      月度
+    </a>
+    <a href="year.html">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="3" width="14" height="12.5" rx="2"/><line x1="1.5" y1="7" x2="15.5" y2="7"/><line x1="5.5" y1="1" x2="5.5" y2="5"/><line x1="11.5" y1="1" x2="11.5" y2="5"/><line x1="4" y1="10.5" x2="9.5" y2="10.5"/><line x1="4" y1="13" x2="13" y2="13"/></svg>
+      年度
+    </a>
+    <a href="records.html">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="3" y1="4.5" x2="14" y2="4.5"/><line x1="3" y1="8.5" x2="14" y2="8.5"/><line x1="3" y1="12.5" x2="10" y2="12.5"/></svg>
+      流水
+    </a>
+    <a href="annual.html">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,13 6.5,8 10,11 15,5"/><polyline points="11,5 15,5 15,9"/></svg>
+      薪水
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="theme-toggle" onclick="toggleTheme()">
+      <span class="toggle-icon" id="theme-icon">🌙</span>
+      <span class="toggle-label" id="theme-label">浅色模式</span>
+    </button>
+  </div>
+</aside>
+
+<nav class="bottom-nav">
+  <a href="add.html"><span class="nav-icon-wrap">💳</span>资产</a>
+  <a href="index.html"><span class="nav-icon-wrap">📊</span>仪表板</a>
+  <a href="calendar.html"><span class="nav-icon-wrap">📅</span>月度</a>
+  <a href="year.html"><span class="nav-icon-wrap">📆</span>年度</a>
+  <a href="records.html"><span class="nav-icon-wrap">📋</span>流水</a>
+  <a href="annual.html"><span class="nav-icon-wrap">📈</span>薪水</a>
+</nav>
+
+<main class="main">
+
+  <!-- 年份导航 -->
+  <div class="page-header">
+    <h1>年度总览</h1>
+    <div class="month-nav" style="margin:0;flex:none">
+      <button onclick="changeYear(-1)">‹</button>
+      <div id="year-label" style="font-size:18px;min-width:60px;text-align:center">—</div>
+      <button onclick="changeYear(1)">›</button>
+    </div>
+  </div>
+
+  <!-- 第一行：三张统计卡片 -->
+  <div class="stat-grid" style="margin-bottom:14px">
+    <div class="stat-card income">
+      <div class="label">年度总收入</div>
+      <div class="value" id="y-income">—</div>
+    </div>
+    <div class="stat-card expense">
+      <div class="label">年度总支出</div>
+      <div class="value" id="y-expense">—</div>
+    </div>
+    <div class="stat-card balance">
+      <div class="label">年度结余</div>
+      <div class="value" id="y-balance">—</div>
+    </div>
+  </div>
+
+  <!-- 第二行：12个月收支对比横轴条形图 -->
+  <div class="card" style="padding:20px;margin-bottom:14px">
+    <h2 style="margin-bottom:16px">月度收支对比</h2>
+    <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
+      <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-2)">
+        <span style="width:10px;height:10px;border-radius:2px;background:var(--income);display:inline-block"></span>收入
+      </span>
+      <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-2)">
+        <span style="width:10px;height:10px;border-radius:2px;background:var(--expense);display:inline-block"></span>支出
+      </span>
+    </div>
+    <div id="month-comparison"><div style="color:var(--text-3);padding:20px 0;text-align:center">加载中…</div></div>
+  </div>
+
+  <!-- 第三行：左边分类排行 + 右边趋势折线图 -->
+  <div class="year-two-col">
+    <div class="card" style="padding:20px">
+      <h2 style="margin-bottom:14px">支出分类排行</h2>
+      <div id="cat-ranking"><div style="color:var(--text-3);padding:12px 0">加载中…</div></div>
+    </div>
+    <div class="card" style="padding:20px">
+      <h2 style="margin-bottom:14px">月度花费趋势</h2>
+      <div style="position:relative">
+        <canvas id="trend-chart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- 第四行：月度数据表格 -->
+  <div class="card" style="padding:20px;margin-top:0">
+    <h2 style="margin-bottom:14px">月度数据明细
+      <span style="font-size:11px;font-weight:400;color:var(--text-3);margin-left:8px">点击行跳转到对应月度</span>
+    </h2>
+    <div style="overflow-x:auto">
+      <table class="year-table" id="month-table">
+        <tbody><tr><td colspan="5" style="padding:20px;text-align:center;color:var(--text-3)">加载中…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<div id="toast"></div>
+<script src="app.js"></script>
+<script>
+let curYear = new Date().getFullYear();
+let trendChart = null;
+const MONTH_NAMES = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+
+function changeYear(d) {
+  curYear += d;
+  load();
+}
+
+function groupByMonth(rows) {
+  const m = {};
+  for (let i = 1; i <= 12; i++) m[i] = { income: 0, expense: 0 };
+  rows.forEach(r => {
+    const mo = +r.date.split('-')[1];
+    if (r.type === 'income') m[mo].income += +r.amount;
+    else m[mo].expense += +r.amount;
+  });
+  return m;
+}
+
+async function load() {
+  document.getElementById('year-label').textContent = curYear;
+
+  const from = `${curYear}-01-01`;
+  const to   = `${curYear}-12-31`;
+
+  const { data, error } = await db.from('transactions').select('*')
+    .gte('date', from).lte('date', to)
+    .order('date', { ascending: true });
+
+  if (error) { showToast('❌ 加载失败：' + error.message); return; }
+  const rows = data || [];
+
+  renderStats(rows);
+  renderMonthBars(rows);
+  renderCategoryBars(rows);
+  renderTrendChart(rows);
+  renderMonthTable(rows);
+}
+
+function renderStats(rows) {
+  const inc = rows.filter(r => r.type === 'income').reduce((s,r) => s + +r.amount, 0);
+  const exp = rows.filter(r => r.type === 'expense').reduce((s,r) => s + +r.amount, 0);
+  const bal = inc - exp;
+
+  document.getElementById('y-income').textContent  = fmtAmt(inc);
+  document.getElementById('y-expense').textContent = fmtAmt(exp);
+  const balEl = document.getElementById('y-balance');
+  balEl.textContent   = fmtAmt(bal);
+  balEl.style.color   = bal >= 0 ? 'var(--income)' : 'var(--expense)';
+}
+
+function renderMonthBars(rows) {
+  const months = groupByMonth(rows);
+  const maxVal = Math.max(...Object.values(months).flatMap(m => [m.income, m.expense]), 1);
+
+  let html = '';
+  for (let m = 1; m <= 12; m++) {
+    const { income, expense } = months[m];
+    const warn    = expense > income && (income > 0 || expense > 0);
+    const isEmpty = income === 0 && expense === 0;
+    const incPct  = (income  / maxVal * 100).toFixed(1);
+    const expPct  = (expense / maxVal * 100).toFixed(1);
+
+    html += `
+      <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border)">
+        <div style="width:26px;font-size:11px;color:${warn?'var(--expense)':'var(--text-3)'};flex-shrink:0">${MONTH_NAMES[m-1]}</div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:4px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+              <div class="yr-bar-anim" data-w="${incPct}" style="height:100%;width:0;border-radius:3px;background:var(--income);transition:width .6s cubic-bezier(.16,1,.3,1)"></div>
+            </div>
+            <span style="font-family:var(--f-mono);font-size:10px;color:var(--income);width:80px;text-align:right;white-space:nowrap">${income>0?fmtAmt(income):(isEmpty?'—':'—')}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+              <div class="yr-bar-anim" data-w="${expPct}" style="height:100%;width:0;border-radius:3px;background:var(--expense);transition:width .6s cubic-bezier(.16,1,.3,1)"></div>
+            </div>
+            <span style="font-family:var(--f-mono);font-size:10px;color:var(--expense);width:80px;text-align:right;white-space:nowrap">${expense>0?fmtAmt(expense):(isEmpty?'—':'—')}</span>
+          </div>
+        </div>
+        <div style="width:18px;text-align:center;font-size:12px;flex-shrink:0">${warn?'⚠':'　'}</div>
+      </div>`;
+  }
+
+  document.getElementById('month-comparison').innerHTML = html;
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.yr-bar-anim').forEach(el => { el.style.width = el.dataset.w + '%'; });
+  });
+}
+
+function renderCategoryBars(rows) {
+  const exp    = rows.filter(r => r.type === 'expense');
+  const catMap = {};
+  exp.forEach(r => { catMap[r.category] = (catMap[r.category] || 0) + +r.amount; });
+  const sorted = Object.entries(catMap).sort((a,b) => b[1]-a[1]);
+  const wrap   = document.getElementById('cat-ranking');
+
+  if (!sorted.length) {
+    wrap.innerHTML = '<div style="color:var(--text-3);padding:12px 0">暂无支出数据</div>';
+    return;
+  }
+
+  const maxV = sorted[0][1] || 1;
+  wrap.innerHTML = sorted.map(([cat, amt]) => {
+    const icon = CAT_ICONS[cat] || '💰';
+    const pct  = (amt / maxV * 100).toFixed(1);
+    return `<div class="account-bar-item">
+      <div class="account-bar-label">${icon} ${escHtml(cat)}</div>
+      <div class="account-bar-track"><div class="account-bar-fill yr-cat-anim" data-w="${pct}" style="width:0%"></div></div>
+      <div class="account-bar-amt">${fmtAmt(amt)}</div>
+    </div>`;
+  }).join('');
+
+  requestAnimationFrame(() => {
+    wrap.querySelectorAll('.yr-cat-anim').forEach(el => { el.style.width = el.dataset.w + '%'; });
+  });
+}
+
+function renderTrendChart(rows) {
+  const months   = groupByMonth(rows);
+  const expenses = Array.from({length:12}, (_,i) => months[i+1].expense);
+
+  const isDark   = document.documentElement.getAttribute('data-theme') !== 'light';
+  const gridCol  = isDark ? 'rgba(255,255,255,.06)' : 'rgba(15,23,42,.06)';
+  const tickCol  = isDark ? 'rgba(239,246,255,.45)' : 'rgba(15,23,42,.45)';
+
+  if (trendChart) trendChart.destroy();
+
+  const maxE = Math.max(...expenses, 1);
+  const nonZero = expenses.filter(v => v > 0);
+  const minE = nonZero.length ? Math.min(...nonZero) : 0;
+
+  const ctx = document.getElementById('trend-chart').getContext('2d');
+
+  trendChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: MONTH_NAMES,
+      datasets: [{
+        data: expenses,
+        borderColor: '#F87171',
+        backgroundColor: function(context) {
+          const chart = context.chart;
+          const { ctx: c, chartArea } = chart;
+          if (!chartArea) return 'rgba(248,113,113,.15)';
+          const g = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+          g.addColorStop(0, 'rgba(248,113,113,.35)');
+          g.addColorStop(1, 'rgba(248,113,113,.0)');
+          return g;
+        },
+        fill: true,
+        tension: 0.4,
+        pointRadius: expenses.map(v => (v === maxE && v > 0) || (v === minE && v > 0) ? 7 : 3),
+        pointHoverRadius: 7,
+        pointBackgroundColor: expenses.map(v =>
+          (v === maxE && v > 0) ? '#F87171' :
+          (v === minE && v > 0 && v !== maxE) ? '#4ADE80' :
+          'rgba(248,113,113,.5)'
+        ),
+        borderWidth: 2,
+      }]
+    },
+    plugins: [{
+      afterDraw(chart) {
+        const { ctx: c, data, scales: { x, y } } = chart;
+        const ds = data.datasets[0].data;
+        const mx = Math.max(...ds, 1);
+        const nz = ds.filter(v => v > 0);
+        const mn = nz.length ? Math.min(...nz) : -1;
+        ds.forEach((v, i) => {
+          if ((v === mx && v > 0) || (v === mn && v > 0 && v !== mx)) {
+            const xp = x.getPixelForValue(i);
+            const yp = y.getPixelForValue(v);
+            const label = (v === mx ? '▲ ' : '▼ ') + 'RM ' + v.toFixed(0);
+            c.save();
+            c.fillStyle = v === mx ? '#F87171' : '#4ADE80';
+            c.font = 'bold 10px Outfit, sans-serif';
+            c.textAlign = 'center';
+            c.fillText(label, xp, yp - 14);
+            c.restore();
+          }
+        });
+      }
+    }],
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: c => '  ' + fmtAmt(c.parsed.y) } }
+      },
+      scales: {
+        x: { grid: { color: gridCol }, ticks: { color: tickCol, font: { family: 'Outfit' } } },
+        y: {
+          grid: { color: gridCol },
+          ticks: { color: tickCol, callback: v => 'RM ' + v, font: { family: 'IBM Plex Mono' } },
+          beginAtZero: true
+        }
+      }
+    }
+  });
+}
+
+function renderMonthTable(rows) {
+  const months = groupByMonth(rows);
+
+  let maxExpM = 0, maxExpV = 0;
+  for (let m = 1; m <= 12; m++) {
+    if (months[m].expense > maxExpV) { maxExpV = months[m].expense; maxExpM = m; }
+  }
+
+  let html = `<thead><tr>
+    <th class="yr-th">月份</th>
+    <th class="yr-th" style="text-align:right">收入</th>
+    <th class="yr-th" style="text-align:right">支出</th>
+    <th class="yr-th" style="text-align:right">结余</th>
+    <th class="yr-th" style="text-align:right">储蓄率</th>
+  </tr></thead><tbody>`;
+
+  for (let m = 1; m <= 12; m++) {
+    const { income, expense } = months[m];
+    const bal       = income - expense;
+    const savRate   = income > 0 ? Math.round((income - expense) / income * 100) + '%' : '—';
+    const highlight = m === maxExpM && maxExpV > 0;
+    const isEmpty   = income === 0 && expense === 0;
+    const rowBg     = highlight ? 'rgba(248,113,113,.08)' : 'transparent';
+
+    html += `<tr class="yr-tr" data-month="${m}" style="background:${rowBg};cursor:pointer" onclick="goToMonth(${m})">
+      <td class="yr-td" style="font-family:var(--f-body)">${MONTH_NAMES[m-1]}${highlight ? ' <span style="font-size:10px">📌</span>' : ''}</td>
+      <td class="yr-td" style="text-align:right;color:${isEmpty?'var(--text-3)':'var(--income)'}">${income > 0 ? fmtAmt(income) : '—'}</td>
+      <td class="yr-td" style="text-align:right;color:${isEmpty?'var(--text-3)':'var(--expense)'}">${expense > 0 ? fmtAmt(expense) : '—'}</td>
+      <td class="yr-td" style="text-align:right;color:${isEmpty?'var(--text-3)':bal>=0?'var(--income)':'var(--expense)'}">${(income>0||expense>0) ? fmtAmt(bal) : '—'}</td>
+      <td class="yr-td" style="text-align:right;color:${isEmpty?'var(--text-3)':income>0&&bal>=0?'var(--income)':'var(--text-2)'}">${savRate}</td>
+    </tr>`;
+  }
+
+  html += '</tbody>';
+  document.getElementById('month-table').innerHTML = html;
+}
+
+function goToMonth(m) {
+  localStorage.setItem('cal_year',  curYear);
+  localStorage.setItem('cal_month', m);
+  location.href = 'calendar.html';
+}
+
+highlightNav();
+load();
+</script>
+</body>
+</html>

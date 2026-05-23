@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>资产 · YuTangAi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🐟</div>
+    <span class="logo-name">YuTangAi</span>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="add.html">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="3.5" width="14" height="11" rx="2"/><path d="M5.5 3.5V2M11.5 3.5V2M1.5 7h14M6 11h2m3 0h-2m0 0v-2m0 2v2"/></svg>
+      资产
+    </a>
+    <a href="index.html">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="10" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="10" width="6" height="6" rx="1.5"/><rect x="10" y="10" width="6" height="6" rx="1.5"/></svg>
+      仪表板
+    </a>
+    <a href="calendar.html">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1.5" y="3" width="14" height="12.5" rx="2"/><line x1="1.5" y1="7" x2="15.5" y2="7"/><line x1="5.5" y1="1" x2="5.5" y2="5"/><line x1="11.5" y1="1" x2="11.5" y2="5"/></svg>
+      月度
+    </a>
+    <a href="year.html">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="3" width="14" height="12.5" rx="2"/><line x1="1.5" y1="7" x2="15.5" y2="7"/><line x1="5.5" y1="1" x2="5.5" y2="5"/><line x1="11.5" y1="1" x2="11.5" y2="5"/><line x1="4" y1="10.5" x2="9.5" y2="10.5"/><line x1="4" y1="13" x2="13" y2="13"/></svg>
+      年度
+    </a>
+    <a href="records.html">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="3" y1="4.5" x2="14" y2="4.5"/><line x1="3" y1="8.5" x2="14" y2="8.5"/><line x1="3" y1="12.5" x2="10" y2="12.5"/></svg>
+      流水
+    </a>
+    <a href="annual.html">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,13 6.5,8 10,11 15,5"/><polyline points="11,5 15,5 15,9"/></svg>
+      薪水
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="theme-toggle" onclick="toggleTheme()">
+      <span class="toggle-icon" id="theme-icon">🌙</span>
+      <span class="toggle-label" id="theme-label">浅色模式</span>
+    </button>
+  </div>
+</aside>
+
+<nav class="bottom-nav">
+  <a href="add.html"><span class="nav-icon-wrap">💳</span>资产</a>
+  <a href="index.html"><span class="nav-icon-wrap">📊</span>仪表板</a>
+  <a href="calendar.html"><span class="nav-icon-wrap">📅</span>月度</a>
+  <a href="year.html"><span class="nav-icon-wrap">📆</span>年度</a>
+  <a href="records.html"><span class="nav-icon-wrap">📋</span>流水</a>
+  <a href="annual.html"><span class="nav-icon-wrap">📈</span>薪水</a>
+</nav>
+
+<main class="main">
+  <h1>资产</h1>
+
+  <!-- 银行卡余额卡片 -->
+  <div class="card balance-card" id="bank-balance-card">
+    <div class="balance-header">
+      <div>
+        <div class="balance-label"><span class="balance-indicator"></span>银行卡余额</div>
+        <div class="balance-amount" id="bank-balance-amount">—</div>
+      </div>
+      <button class="balance-edit-btn" onclick="showBalanceEdit()">✏️ 调整</button>
+    </div>
+    <div id="balance-edit-wrap" style="display:none">
+      <div class="balance-inline-wrap">
+        <input type="number" class="balance-inline-input" id="balance-input" placeholder="0.00" min="0" step="0.01">
+        <button class="balance-inline-save" onclick="saveBalance()">确认</button>
+        <button class="balance-inline-cancel" onclick="hideBalanceEdit()">取消</button>
+      </div>
+      <div style="font-size:11px;color:var(--text-3);margin-top:6px">直接输入当前实际余额，覆盖系统计算值</div>
+    </div>
+    <div class="balance-updated" id="bank-balance-updated"></div>
+  </div>
+
+  <!-- 两列布局：墨疾角色 + 愿望清单 -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+    <!-- 像素角色墨疾（由 mochi.js 生成） -->
+    <div id="mochi-container"></div>
+
+    <!-- 愿望清单 -->
+    <div class="card" style="padding:20px">
+      <h2>愿望清单</h2>
+      <div class="wish-list" id="wish-list">
+        <div class="skeleton skeleton-line" style="height:60px"></div>
+      </div>
+      <div class="add-wish-form" style="margin-top:12px">
+        <input type="text" id="wish-name" placeholder="愿望名称" maxlength="30">
+        <input type="text" id="wish-icon" placeholder="emoji 🎯" maxlength="4" style="width:70px;flex:none">
+        <input type="number" id="wish-price" placeholder="目标价格" min="0" step="0.01">
+        <button class="add-wish-btn" onclick="addWish()">+ 添加</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RM100k 财务自由预测 -->
+  <h2 style="margin-top:4px">📈 财务自由预测</h2>
+  <div class="prediction-cards" id="pred-cards">
+    <div class="pred-card">
+      <div class="pred-label">当前储蓄速度</div>
+      <div class="pred-value" id="pred-speed">—</div>
+      <div class="pred-sub" id="pred-speed-sub">计算中…</div>
+    </div>
+    <div class="pred-card">
+      <div class="pred-label">预计达标时间</div>
+      <div class="pred-value" id="pred-time">—</div>
+      <div class="pred-sub" id="pred-date">—</div>
+    </div>
+    <div class="pred-card">
+      <div class="pred-label">提前达标方案</div>
+      <div class="pred-value" style="font-size:13px;color:var(--cyan)" id="pred-boost-head">—</div>
+      <div class="pred-sub" id="pred-boost">—</div>
+    </div>
+  </div>
+  <div class="card" style="padding:20px;margin-bottom:14px">
+    <div style="display:flex;gap:16px;margin-bottom:12px;font-size:12px;color:var(--text-3)">
+      <span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:24px;height:2px;background:var(--cyan);border-radius:2px"></span>当前速度</span>
+      <span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:24px;height:2px;background:var(--income);border-radius:2px;border-bottom:2px dashed var(--income)"></span>每月+RM500</span>
+    </div>
+    <div style="position:relative;height:200px" id="pred-chart-wrap">
+      <canvas id="pred-chart"></canvas>
+    </div>
+  </div>
+
+  <!-- 新增记录 -->
+  <h2>新增记录</h2>
+  <div class="card">
+    <div class="form-group">
+      <label>收支类型</label>
+      <div class="type-toggle">
+        <button class="type-btn active expense" id="btn-expense" onclick="setType('expense')">💸 支出</button>
+        <button class="type-btn income"         id="btn-income"  onclick="setType('income')">💰 收入</button>
+      </div>
+    </div>
+    <div class="form-group"><label>日期</label><input type="date" id="f-date"></div>
+    <div class="form-group"><label>类别</label><select id="f-category"></select></div>
+    <div class="form-group"><label>金额（RM）</label><input type="number" id="f-amount" placeholder="0.00" min="0" step="0.01"></div>
+    <div class="form-group">
+      <label>账户</label>
+      <select id="f-account"><option>TouchNGo</option><option selected>银行卡</option><option>信用卡</option></select>
+    </div>
+    <div class="form-group"><label>备注（选填）</label><input type="text" id="f-notes" placeholder="例：午饭、超市买菜…" maxlength="100"></div>
+    <button class="btn-primary" onclick="submitForm()">添加记录</button>
+  </div>
+
+  <h2>最近记录</h2>
+  <div class="card" style="padding:0 22px">
+    <ul class="tx-list" id="tx-list"><li class="empty">加载中…</li></ul>
+  </div>
+</main>
+
+<div id="toast"></div>
+<script src="app.js"></script>
+<script src="modal.js"></script>
+<script src="mochi.js"></script>
+<script>
+let currentType = 'expense';
+
+function setType(t) {
+  currentType = t;
+  document.getElementById('btn-expense').className = 'type-btn' + (t === 'expense' ? ' active expense' : '');
+  document.getElementById('btn-income').className  = 'type-btn' + (t === 'income'  ? ' active income'  : '');
+  renderCategories();
+}
+
+function renderCategories() {
+  const cats = currentType === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
+  document.getElementById('f-category').innerHTML = cats.map(c => `<option>${c}</option>`).join('');
+}
+
+// ── 银行卡余额显示 ──────────────────────────────
+async function loadBalance() {
+  const row = await getBankBalance();
+  const el  = document.getElementById('bank-balance-amount');
+  const upd = document.getElementById('bank-balance-updated');
+  if (row) {
+    setMasked(el, row.balance);
+    const d = new Date(row.updated_at);
+    upd.textContent = `上次更新：${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  } else {
+    el.textContent  = 'RM 0.00';
+    upd.textContent = '尚未设定初始余额';
+  }
+}
+
+function showBalanceEdit() {
+  const inp    = document.getElementById('balance-input');
+  const amtEl  = document.getElementById('bank-balance-amount');
+  const num    = parseFloat(amtEl.dataset.rawAmt) || 0;
+  inp.value = num.toFixed(2);
+  document.getElementById('balance-edit-wrap').style.display = '';
+  inp.focus(); inp.select();
+}
+
+function hideBalanceEdit() {
+  document.getElementById('balance-edit-wrap').style.display = 'none';
+}
+
+async function saveBalance() {
+  const val = parseFloat(document.getElementById('balance-input').value);
+  if (isNaN(val) || val < 0) { showToast('请输入有效金额'); return; }
+  const ok = await setBankBalance(val);
+  if (ok) { showToast('✅ 余额已更新'); hideBalanceEdit(); loadBalance(); }
+  else     { showToast('❌ 更新失败'); }
+}
+
+// ── 新增记录 ────────────────────────────────────
+async function submitForm() {
+  const date     = document.getElementById('f-date').value;
+  const category = document.getElementById('f-category').value;
+  const amount   = parseFloat(document.getElementById('f-amount').value);
+  const account  = document.getElementById('f-account').value;
+  const notes    = document.getElementById('f-notes').value.trim();
+
+  if (!date)                  return showToast('请选择日期');
+  if (!category)              return showToast('请选择类别');
+  if (!amount || amount <= 0) return showToast('请输入有效金额');
+
+  const { error } = await db.from('transactions').insert({
+    date, type: currentType, category, amount, account, notes
+  });
+  if (error) { showToast('❌ 保存失败：' + error.message); return; }
+
+  // 银行卡余额联动
+  if (account === '银行卡') {
+    await adjustBankBalance(bankDelta(currentType, amount));
+    loadBalance();
+  }
+
+  showToast('✅ 已记录！');
+  showXpFloat(10);
+  // 触发墨疾攻击动画（收入时）
+  if (currentType === 'income') mochiOnIncome && mochiOnIncome(amount);
+  else                          mochiAttack   && mochiAttack();
+  document.getElementById('f-amount').value = '';
+  document.getElementById('f-notes').value  = '';
+  loadRecent();
+}
+
+async function loadRecent() {
+  const { data, error } = await db
+    .from('transactions').select('*')
+    .order('date', { ascending: false })
+    .order('created_at', { ascending: false })
+    .limit(30);
+
+  const ul = document.getElementById('tx-list');
+  if (error || !data?.length) { ul.innerHTML = '<li class="empty">暂无记录</li>'; return; }
+  ul.innerHTML = data.map(r => renderTxItem(r)).join('');
+}
+
+document.getElementById('f-date').value = new Date().toISOString().slice(0, 10);
+renderCategories();
+window.__reload = loadRecent;
+loadBalance();
+loadRecent();
+loadWishes();
+loadPrediction();
+// 初始化像素角色墨疾
+mochiInit('mochi-container');
+
+// ── 愿望清单 ─────────────────────────────────────
+async function loadWishes() {
+  const { data, error } = await db.from('wishes').select('*')
+    .order('done', { ascending: true })
+    .order('created_at', { ascending: true });
+  const ul = document.getElementById('wish-list');
+  if (error) { ul.innerHTML = '<div style="color:var(--text-3);font-size:12px">请先建立 wishes 表</div>'; return; }
+  const wishes = data || [];
+  if (!wishes.length) { ul.innerHTML = '<div class="empty" style="padding:12px 0">还没有愿望，加一个吧！</div>'; return; }
+
+  ul.innerHTML = wishes.map(w => {
+    const target    = +w.price || 0;
+    const allocated = +w.allocated_amount || 0;
+    const pct       = target > 0 ? Math.min(allocated / target * 100, 100).toFixed(0) : 0;
+    const remain    = Math.max(target - allocated, 0);
+    const done      = w.done;
+    return `
+      <div class="wish-item ${done?'done':''}">
+        <span class="wish-icon">${escHtml(w.icon||'🎯')}</span>
+        <div class="wish-info">
+          <div class="wish-name">${escHtml(w.name)}</div>
+          <div class="wish-price">${fmtAmt(target)}</div>
+          <div class="wish-progress-bar"><div class="wish-progress-fill" style="width:${pct}%"></div></div>
+          <div class="wish-meta">${done ? '已达成 ✅' : `还差 ${fmtAmt(remain)}`}</div>
+        </div>
+        <button class="wish-done-btn" onclick="toggleWish('${escHtml(w.id)}',${!done})">${done?'取消':'达成'}</button>
+        <button class="delete-btn" onclick="deleteWish('${escHtml(w.id)}')">🗑</button>
+      </div>`;
+  }).join('');
+}
+
+async function addWish() {
+  const name  = document.getElementById('wish-name').value.trim();
+  const icon  = document.getElementById('wish-icon').value.trim() || '🎯';
+  const price = parseFloat(document.getElementById('wish-price').value);
+  if (!name || !price || price <= 0) { showToast('请填写名称和价格'); return; }
+
+  const { error } = await db.from('wishes').insert({ name, icon, price, done: false });
+  if (error) { showToast('❌ ' + error.message); return; }
+  document.getElementById('wish-name').value  = '';
+  document.getElementById('wish-icon').value  = '';
+  document.getElementById('wish-price').value = '';
+  showToast('✅ 已添加！');
+  loadWishes();
+}
+
+async function toggleWish(id, done) {
+  await db.from('wishes').update({ done }).eq('id', id);
+  loadWishes();
+}
+
+async function deleteWish(id) {
+  if (!confirm('删除这个愿望？')) return;
+  await db.from('wishes').delete().eq('id', id);
+  showToast('已删除');
+  loadWishes();
+}
+
+// ── RM100k 财务自由预测 ──────────────────────────
+let _predChart = null;
+const GOAL = 100000;
+const MILESTONES = [
+  { level: 10, amount: 18000 },
+  { level: 20, amount: 38000 },
+  { level: 30, amount: 58000 },
+  { level: 40, amount: 78000 },
+  { level: 50, amount: 100000 },
+];
+
+async function loadPrediction() {
+  const now = new Date();
+
+  // 过去3个完整月的数据
+  const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+  const lastMonthEnd   = new Date(now.getFullYear(), now.getMonth(), 0).toISOString().slice(0, 10);
+  const fromDate = threeMonthsAgo.toISOString().slice(0, 10);
+
+  const [balRes, txRes] = await Promise.all([
+    getBankBalance(),
+    db.from('transactions').select('date,type,amount').gte('date', fromDate).lte('date', lastMonthEnd),
+  ]);
+
+  const currentSavings = balRes ? parseFloat(balRes.balance) : 0;
+  const rows = txRes.data || [];
+
+  // 按月聚合
+  const monthMap = {};
+  rows.forEach(r => {
+    const key = r.date.slice(0, 7);
+    if (!monthMap[key]) monthMap[key] = { income: 0, expense: 0 };
+    if (r.type === 'income')  monthMap[key].income  += +r.amount;
+    if (r.type === 'expense') monthMap[key].expense += +r.amount;
+  });
+
+  const months = Object.values(monthMap);
+  const totalNet   = months.reduce((s, m) => s + m.income - m.expense, 0);
+  const avgMonthly = months.length > 0 ? totalNet / months.length : 0;
+
+  const speedEl    = document.getElementById('pred-speed');
+  const speedSubEl = document.getElementById('pred-speed-sub');
+  const timeEl     = document.getElementById('pred-time');
+  const dateEl     = document.getElementById('pred-date');
+  const boostHead  = document.getElementById('pred-boost-head');
+  const boostEl    = document.getElementById('pred-boost');
+
+  speedEl.textContent    = fmtAmt(avgMonthly);
+  speedSubEl.textContent = months.length > 0 ? `过去${months.length}个月月均净存款` : '暂无历史数据';
+
+  if (avgMonthly <= 0) {
+    timeEl.textContent  = '—';
+    dateEl.textContent  = '当前储蓄速度不足，请先增加收入或减少支出';
+    boostHead.textContent = '—';
+    boostEl.textContent = '';
+    renderPredChart(currentSavings, 0);
+    return;
+  }
+
+  const remaining = Math.max(GOAL - currentSavings, 0);
+
+  if (remaining <= 0) {
+    timeEl.textContent  = '🎉 已达成！';
+    dateEl.textContent  = 'RM100k 目标已完成，墨疾满级！';
+    boostHead.textContent = '恭喜！';
+    boostEl.textContent = '';
+    renderPredChart(currentSavings, avgMonthly);
+    return;
+  }
+
+  const monthsToGoal = Math.ceil(remaining / avgMonthly);
+  const years  = Math.floor(monthsToGoal / 12);
+  const mths   = monthsToGoal % 12;
+  const timeStr = years > 0
+    ? (mths > 0 ? `${years}年${mths}个月` : `${years}年`)
+    : `${mths}个月`;
+
+  const targetDate = new Date(now.getFullYear(), now.getMonth() + monthsToGoal, 1);
+  const targetStr  = `${targetDate.getFullYear()}年${targetDate.getMonth() + 1}月`;
+
+  timeEl.textContent  = timeStr;
+  dateEl.textContent  = `预计 ${targetStr} 达成 🎯`;
+
+  const boost500Months  = Math.ceil(remaining / (avgMonthly + 500));
+  const boost1000Months = Math.ceil(remaining / (avgMonthly + 1000));
+  const save500  = Math.max(monthsToGoal - boost500Months, 0);
+  const save1000 = Math.max(monthsToGoal - boost1000Months, 0);
+
+  boostHead.textContent = '如果…';
+  boostEl.innerHTML =
+    `每月多存 <strong>RM500</strong>，提前 <strong>${save500}</strong> 个月<br>` +
+    `每月多存 <strong>RM1000</strong>，提前 <strong>${save1000}</strong> 个月`;
+
+  renderPredChart(currentSavings, avgMonthly, monthsToGoal);
+}
+
+function renderPredChart(currentSavings, avgMonthly, monthsToGoal = 60) {
+  const ctx = document.getElementById('pred-chart');
+  if (!ctx) return;
+
+  // 图表最多显示到达标后再多6个月，最长120个月
+  const totalMonths = Math.min(Math.max(monthsToGoal + 6, 24), 120);
+  const now = new Date();
+
+  const labels      = [];
+  const baseData    = [];
+  const boost500Data = [];
+
+  for (let m = 0; m <= totalMonths; m++) {
+    const d = new Date(now.getFullYear(), now.getMonth() + m, 1);
+    // X轴标签：每12个月、起点和终点才显示
+    const showLabel = m === 0 || m === totalMonths || d.getMonth() === 0;
+    labels.push(showLabel ? `${d.getFullYear()}/${d.getMonth() + 1}` : '');
+
+    const base   = Math.min(currentSavings + avgMonthly * m,       GOAL * 1.05);
+    const boost  = Math.min(currentSavings + (avgMonthly + 500) * m, GOAL * 1.05);
+    baseData.push(parseFloat(base.toFixed(2)));
+    boost500Data.push(parseFloat(boost.toFixed(2)));
+  }
+
+  if (_predChart) _predChart.destroy();
+
+  const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+  const gridColor  = isDark ? 'rgba(255,255,255,.05)' : 'rgba(15,23,42,.06)';
+  const tickColor  = isDark ? 'rgba(239,246,255,.35)' : 'rgba(15,23,42,.4)';
+  const legendColor = isDark ? 'rgba(239,246,255,.55)' : 'rgba(15,23,42,.6)';
+
+  const milestoneDraw = {
+    id: 'milestoneDraw',
+    afterDraw(chart) {
+      const { ctx: c, scales: { x, y } } = chart;
+      MILESTONES.forEach(ms => {
+        const yPx = y.getPixelForValue(ms.amount);
+        if (yPx < y.top || yPx > y.bottom) return;
+        c.save();
+        c.setLineDash([4, 6]);
+        c.strokeStyle = 'rgba(251,191,36,.28)';
+        c.lineWidth = 1;
+        c.beginPath(); c.moveTo(x.left, yPx); c.lineTo(x.right, yPx); c.stroke();
+        c.setLineDash([]);
+        c.font = '10px Outfit, sans-serif';
+        c.fillStyle = 'rgba(251,191,36,.6)';
+        c.textAlign = 'left';
+        c.fillText(`Lv.${ms.level}`, x.left + 4, yPx - 3);
+        c.restore();
+      });
+      // RM100k 目标线
+      const y100k = y.getPixelForValue(GOAL);
+      if (y100k >= y.top && y100k <= y.bottom) {
+        c.save();
+        c.setLineDash([6, 4]);
+        c.strokeStyle = 'rgba(74,222,128,.45)';
+        c.lineWidth = 1.5;
+        c.beginPath(); c.moveTo(x.left, y100k); c.lineTo(x.right, y100k); c.stroke();
+        c.setLineDash([]);
+        c.font = 'bold 10px Outfit, sans-serif';
+        c.fillStyle = 'rgba(74,222,128,.75)';
+        c.textAlign = 'right';
+        c.fillText('RM100k 目标', x.right - 4, y100k - 3);
+        c.restore();
+      }
+    }
+  };
+
+  _predChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: '当前速度',
+          data: baseData,
+          borderColor: '#22D3EE',
+          backgroundColor: 'rgba(34,211,238,.07)',
+          fill: true,
+          borderWidth: 2,
+          pointRadius: 0,
+          tension: 0.35,
+          order: 2,
+        },
+        {
+          label: '每月+RM500',
+          data: boost500Data,
+          borderColor: '#4ADE80',
+          backgroundColor: 'rgba(74,222,128,.04)',
+          fill: false,
+          borderWidth: 2,
+          pointRadius: 0,
+          tension: 0.35,
+          borderDash: [6, 3],
+          order: 1,
+        },
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 600 },
+      plugins: {
+        legend: { labels: { color: legendColor, font: { size: 11, family: 'Outfit' }, boxWidth: 20, padding: 12 } },
+        tooltip: {
+          callbacks: {
+            title: items => items[0].label || '',
+            label: item => `${item.dataset.label}: RM ${item.parsed.y.toLocaleString('en-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: gridColor },
+          ticks: { color: tickColor, font: { size: 10 }, maxRotation: 0, autoSkip: false }
+        },
+        y: {
+          min: Math.max(0, currentSavings - 2000),
+          grid: { color: gridColor },
+          ticks: {
+            color: tickColor, font: { size: 10 },
+            callback: v => v >= 1000 ? 'RM ' + (v / 1000).toFixed(0) + 'k' : 'RM ' + v
+          }
+        }
+      }
+    },
+    plugins: [milestoneDraw]
+  });
+}
+</script>
+</body>
+</html>

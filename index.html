@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>仪表板 · YuTangAi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo"><div class="logo-icon">🐟</div><span class="logo-name">YuTangAi</span></div>
+  <nav class="sidebar-nav">
+    <a href="add.html"><svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="3.5" width="14" height="11" rx="2"/><path d="M5.5 3.5V2M11.5 3.5V2M1.5 7h14M6 11h2m3 0h-2m0 0v-2m0 2v2"/></svg>资产</a>
+    <a href="index.html"><svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="10" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="10" width="6" height="6" rx="1.5"/><rect x="10" y="10" width="6" height="6" rx="1.5"/></svg>仪表板</a>
+    <a href="calendar.html"><svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1.5" y="3" width="14" height="12.5" rx="2"/><line x1="1.5" y1="7" x2="15.5" y2="7"/><line x1="5.5" y1="1" x2="5.5" y2="5"/><line x1="11.5" y1="1" x2="11.5" y2="5"/></svg>月度</a>
+    <a href="year.html"><svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="3" width="14" height="12.5" rx="2"/><line x1="1.5" y1="7" x2="15.5" y2="7"/><line x1="5.5" y1="1" x2="5.5" y2="5"/><line x1="11.5" y1="1" x2="11.5" y2="5"/><line x1="4" y1="10.5" x2="9.5" y2="10.5"/><line x1="4" y1="13" x2="13" y2="13"/></svg>年度</a>
+    <a href="records.html"><svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="3" y1="4.5" x2="14" y2="4.5"/><line x1="3" y1="8.5" x2="14" y2="8.5"/><line x1="3" y1="12.5" x2="10" y2="12.5"/></svg>流水</a>
+    <a href="annual.html"><svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,13 6.5,8 10,11 15,5"/><polyline points="11,5 15,5 15,9"/></svg>薪水</a>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="theme-toggle" onclick="toggleTheme()"><span class="toggle-icon" id="theme-icon">🌙</span><span class="toggle-label" id="theme-label">浅色模式</span></button>
+  </div>
+</aside>
+<nav class="bottom-nav">
+  <a href="add.html"><span class="nav-icon-wrap">💳</span>资产</a>
+  <a href="index.html"><span class="nav-icon-wrap">📊</span>仪表板</a>
+  <a href="calendar.html"><span class="nav-icon-wrap">📅</span>月度</a>
+  <a href="year.html"><span class="nav-icon-wrap">📆</span>年度</a>
+  <a href="records.html"><span class="nav-icon-wrap">📋</span>流水</a>
+  <a href="annual.html"><span class="nav-icon-wrap">📈</span>薪水</a>
+</nav>
+
+<main class="main">
+  <div class="page-header">
+    <h1>仪表板</h1>
+    <div class="month-nav" style="margin:0;flex:none">
+      <button onclick="changeMonth(-1)">‹</button>
+      <div class="month-label" id="month-label" style="font-size:16px;min-width:100px;text-align:center">—</div>
+      <button onclick="changeMonth(1)">›</button>
+    </div>
+    <div class="page-date" id="page-date"></div>
+  </div>
+
+  <div class="stat-grid" style="margin-bottom:14px">
+    <div class="stat-card income"><div class="label">收入</div><div class="value" id="stat-income">—</div></div>
+    <div class="stat-card expense"><div class="label">支出</div><div class="value" id="stat-expense">—</div></div>
+    <div class="stat-card balance"><div class="label">结余</div><div class="value" id="stat-balance">—</div></div>
+  </div>
+
+  <div class="dashboard-grid">
+    <!-- ═══ 左列 60% ═══ -->
+    <div class="dash-col">
+      <!-- Banner 面积折线图 -->
+      <div class="card banner-card">
+        <div class="banner-left">
+          <div class="banner-label">本月支出趋势</div>
+          <div class="banner-total" id="b-total">RM 0.00</div>
+          <div class="banner-today-label">今日支出</div>
+          <div class="banner-today-val" id="b-today">RM 0.00</div>
+        </div>
+        <div class="banner-right"><canvas id="trend-chart"></canvas></div>
+      </div>
+
+      <!-- 🍜 餐饮预算小部件 -->
+      <div class="card" id="budget-widget" style="padding:18px;display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <h2 style="margin-bottom:0">🍜 餐饮预算</h2>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-family:var(--f-mono);font-size:11px;color:var(--text-3)" id="bw-budget-label">预算 RM 1,000</span>
+            <button onclick="editBudgetInline()" style="background:none;border:none;color:var(--text-3);cursor:pointer;font-size:12px;padding:2px 6px;border-radius:4px" title="修改预算">✏️</button>
+          </div>
+        </div>
+        <!-- 已花费 + 进度条 -->
+        <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px">
+          <span style="font-family:var(--f-mono);font-size:26px;font-weight:700;color:var(--expense)" id="bw-spent">RM 0.00</span>
+          <span style="font-size:11px;color:var(--text-3)">已花费</span>
+          <span style="font-size:11px;color:var(--text-3);margin-left:auto">剩 <span id="bw-remain" style="color:var(--income);font-family:var(--f-mono)">RM 0.00</span></span>
+        </div>
+        <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-bottom:12px">
+          <div id="bw-bar" style="height:100%;border-radius:3px;background:linear-gradient(90deg,var(--expense),var(--amber));transition:width .5s ease;width:0%"></div>
+        </div>
+        <!-- 三列统计 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+          <div style="text-align:center;padding:8px;background:var(--card-2);border-radius:var(--r-sm)">
+            <div style="font-size:10px;color:var(--text-3);margin-bottom:3px">日均花费</div>
+            <div style="font-family:var(--f-mono);font-size:14px;font-weight:600;color:var(--text)" id="bw-avg">—</div>
+          </div>
+          <div style="text-align:center;padding:8px;background:var(--card-2);border-radius:var(--r-sm)">
+            <div style="font-size:10px;color:var(--text-3);margin-bottom:3px">剩余天数</div>
+            <div style="font-family:var(--f-mono);font-size:14px;font-weight:600;color:var(--amber)" id="bw-days">—</div>
+          </div>
+          <div style="text-align:center;padding:8px;background:var(--cyan-dim);border:1px solid var(--cyan-dim);border-radius:var(--r-sm)">
+            <div style="font-size:10px;color:var(--cyan);margin-bottom:3px">每天可花</div>
+            <div style="font-family:var(--f-mono);font-size:14px;font-weight:700;color:var(--cyan)" id="bw-daily">—</div>
+          </div>
+        </div>
+        <div id="bw-warn" style="display:none;margin-top:8px;font-size:12px;color:var(--expense)">⚠️ 已超支 <span id="bw-over"></span></div>
+      </div>
+
+      <!-- 支出分类横轴条形图 -->
+      <div class="card" style="padding:20px">
+        <h2>支出分类排行</h2>
+        <div class="cat-bars" id="cat-bars">
+          <div class="skeleton skeleton-line" style="height:16px"></div>
+          <div class="skeleton skeleton-line" style="height:16px;opacity:.7;margin-top:8px"></div>
+          <div class="skeleton skeleton-line" style="height:16px;opacity:.5;margin-top:8px"></div>
+        </div>
+      </div>
+
+      <!-- 节省对比 + 月度评分 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="card" style="padding:18px">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:0">
+            <h2 style="margin-bottom:0">月度理财评分</h2>
+            <div style="position:relative;display:inline-block">
+              <span style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;background:var(--border);border-radius:50%;font-size:10px;color:var(--text-3);cursor:help;font-weight:700;line-height:1">?</span>
+              <div style="display:none;position:fixed;background:var(--card-2);border:1px solid var(--border-2);border-radius:10px;padding:10px 14px;width:220px;font-size:11px;color:var(--text-2);z-index:9999;line-height:1.6;white-space:normal;box-shadow:0 8px 32px rgba(0,0,0,.5)" class="score-tooltip">
+                <div style="font-weight:600;color:var(--text);margin-bottom:6px">评分说明</div>
+                <div>🍜 <b>餐饮控制（30分）</b><br>餐饮低于RM700=30分<br>超过RM1000=0分</div>
+                <div style="margin-top:6px">💰 <b>储蓄率（40分）</b><br>储蓄率≥50%=40分<br>低于10%=0分</div>
+                <div style="margin-top:6px">📅 <b>记账完整（30分）</b><br>记账天数÷本月天数×30</div>
+              </div>
+            </div>
+          </div>
+          <div class="score-display" style="margin-top:10px">
+            <span class="score-number" id="score-num" style="color:var(--cyan)">—</span>
+            <span class="score-grade" id="score-grade">—</span>
+          </div>
+          <div class="score-bars">
+            <div class="score-bar-row"><div class="score-bar-label">餐饮控制</div><div class="score-bar-track"><div class="score-bar-fill" id="sb-dining" style="width:0%"></div></div><div class="score-bar-val" id="sv-dining">0</div></div>
+            <div class="score-bar-row"><div class="score-bar-label">储蓄率</div><div class="score-bar-track"><div class="score-bar-fill" id="sb-save" style="width:0%"></div></div><div class="score-bar-val" id="sv-save">0</div></div>
+            <div class="score-bar-row"><div class="score-bar-label">记账完整</div><div class="score-bar-track"><div class="score-bar-fill" id="sb-rec" style="width:0%"></div></div><div class="score-bar-val" id="sv-rec">0</div></div>
+          </div>
+          <div class="score-compare" id="score-compare"></div>
+        </div>
+        <div class="card" style="padding:18px">
+          <h2>比上月节省</h2>
+          <div id="savings-viz-wrap">
+            <div class="skeleton skeleton-line" style="height:30px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ 右列 40% ═══ -->
+    <div class="dash-col">
+      <!-- BOSS + 等级 -->
+      <div class="card" style="padding:20px">
+        <div class="savings-display">
+          <span class="savings-amount" id="savings-amt">—</span>
+          <span class="savings-label">总存款</span>
+        </div>
+        <div class="boss-title">
+          <span class="boss-skull">💀</span>
+          <span class="boss-name-text">财务自由 BOSS</span>
+          <span class="boss-dmg" id="boss-dmg">已打 0%</span>
+        </div>
+        <div class="boss-hp-outer"><div class="boss-hp-inner" id="boss-hp" style="width:100%"></div></div>
+        <div class="boss-hp-text"><span id="boss-hp-left">剩余 RM 100,000</span><span style="color:var(--text-3)">目标 RM 100k</span></div>
+
+        <div class="level-section">
+          <div class="level-row">
+            <div class="level-badge" id="lv-badge">Lv.1</div>
+            <div><div class="level-name-text" id="lv-name">萌新理财师</div><div class="level-next-text" id="lv-next">再存 RM 5,000 升级</div></div>
+          </div>
+          <div class="level-xp-bar"><div class="level-xp-fill" id="lv-xp" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <!-- 连击 + 成就 + 月度挑战 -->
+      <div class="card" style="padding:18px">
+        <div class="streak-row" style="padding:0 0 10px">
+          <span class="streak-fire">🔥</span>
+          <span class="streak-count" id="streak-count">0</span>
+          <span class="streak-label">天连续记账</span>
+        </div>
+        <div class="achievements" id="achievements" style="margin-bottom:12px">
+          <div class="badge locked"><span title="节俭王">🏆</span><div class="badge-tooltip">节俭王：餐饮低于预算50%</div></div>
+          <div class="badge locked"><span title="记账狂人">🔥</span><div class="badge-tooltip">记账狂人：连续30天记账</div></div>
+          <div class="badge locked"><span title="零花费日">⚡</span><div class="badge-tooltip">零花费日：某天支出为0</div></div>
+          <div class="badge locked"><span title="存钱机器">💰</span><div class="badge-tooltip">存钱机器：储蓄率超30%</div></div>
+          <div class="badge locked" id="badge-shopping"><span>🏆</span><div class="badge-tooltip">极简生活者：购物低于RM300</div></div>
+          <div class="badge locked" id="badge-dining500"><span>🍽️</span><div class="badge-tooltip">美食控制：餐饮低于RM500</div></div>
+          <div class="badge locked" id="badge-alldays"><span>📆</span><div class="badge-tooltip">记账达人：每天都记账</div></div>
+        </div>
+        <h2 style="margin-bottom:8px">月度挑战</h2>
+        <div class="challenge-list" id="challenge-list"></div>
+      </div>
+
+      <!-- 每日任务 -->
+      <div class="card" style="padding:18px">
+        <h2 style="margin-bottom:10px">每日任务</h2>
+        <div class="task-list" id="task-list"><div class="skeleton skeleton-line" style="height:38px"></div></div>
+      </div>
+
+      <!-- 最近记录（显示8笔） -->
+      <div class="card" style="padding:0 18px">
+        <h2 style="padding-top:16px">最近记录</h2>
+        <ul class="tx-list" id="recent-list" style="margin:0 -6px"><li class="empty">加载中…</li></ul>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="toast"></div>
+<script src="app.js"></script>
+<script src="modal.js"></script>
+<script>
+let year, month, trendChart, _budget = 1000;
+
+// 等级阈值 — 与 mochi.js MOCHI_FORMS 完全一致
+const LEVEL_THRESHOLDS = [0, 8000, 18000, 28000, 38000, 48000, 58000, 68000, 78000, 98000, 100000];
+const LEVEL_NUMBERS    = [1,    5,    10,    15,    20,    25,    30,    35,    40,    50,    50];
+const LEVEL_NAMES      = ['布衣少年','初出茅庐','江湖游侠','门派弟子','一方高手','名震江湖','宗师境界','天下无双','封神之路','龙魂剑圣','龙魂剑圣'];
+const CAT_COLORS  = ['#F87171','#FBBF24','#34D399','#22D3EE','#A78BFA','#FB923C','#F472B6','#64748B'];
+const MILESTONES  = [5000,10000,20000,30000,50000,75000,100000];
+
+// ── 每日任务定义 ──────────────────────────────
+const ALL_TASKS = [
+  { id:'record_any',   text:'今天记录至少1笔',  xp:30, emoji:'📝', check: r => r.length > 0 },
+  { id:'record_3',     text:'今天记录3笔以上',  xp:40, emoji:'✨', check: r => r.length >= 3 },
+  { id:'dining_30',    text:'餐饮不超过RM30',   xp:30, emoji:'🍜', check: r => r.filter(t=>t.category==='餐饮'&&t.type==='expense').reduce((s,t)=>s + +t.amount,0) < 30 },
+  { id:'no_entertain', text:'今天不娱乐消费',   xp:20, emoji:'🎮', check: r => r.filter(t=>t.category==='娱乐'&&t.type==='expense').length === 0 },
+  { id:'no_shopping',  text:'今天不购物',        xp:25, emoji:'🛍️', check: r => r.filter(t=>t.category==='购物'&&t.type==='expense').length === 0 },
+  { id:'exp_20',       text:'今日总支出低于RM20',xp:50, emoji:'💰', check: r => r.filter(t=>t.type==='expense').reduce((s,t)=>s + +t.amount,0) < 20 },
+];
+
+// ── 月度挑战定义 ──────────────────────────────
+const MONTHLY_CHALLENGES = [
+  { id:'shopping_300', icon:'🏆', name:'极简生活者', desc:'购物低于RM300', badgeId:'badge-shopping',
+    check: rows => rows.filter(r=>r.type==='expense'&&r.category==='购物').reduce((s,r)=>s + +r.amount,0) < 300 },
+  { id:'dining_500',   icon:'🍽️', name:'美食控制',   desc:'餐饮低于RM500', badgeId:'badge-dining500',
+    check: rows => rows.filter(r=>r.type==='expense'&&r.category==='餐饮').reduce((s,r)=>s + +r.amount,0) < 500 },
+  { id:'record_all',   icon:'🔥', name:'记账达人',   desc:'本月每天都记账', badgeId:'badge-alldays',
+    check: (rows, days) => new Set(rows.map(r=>r.date)).size >= days },
+];
+
+async function init() {
+  const now = new Date();
+  year = now.getFullYear(); month = now.getMonth() + 1;
+  document.getElementById('page-date').textContent =
+    now.toLocaleDateString('zh-CN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const {data:s} = await db.from('settings').select('value').eq('key','food_budget').maybeSingle();
+  if (s) _budget = parseFloat(s.value) || 1000;
+  await load();
+  await loadGamification();
+  renderDailyTasks([]);
+}
+
+function changeMonth(d) {
+  month += d; if(month>12){month=1;year++;} if(month<1){month=12;year--;}
+  load();
+}
+
+async function load() {
+  document.getElementById('month-label').textContent = fmtMonth(year, month);
+  const from = `${year}-${String(month).padStart(2,'0')}-01`;
+  const to   = new Date(year, month, 0).toISOString().slice(0,10);
+  const {data,error} = await db.from('transactions').select('*').gte('date',from).lte('date',to).order('date',{ascending:true});
+  if(error){showToast('加载失败');return;}
+  const rows = data||[];
+
+  const inc = rows.filter(r=>r.type==='income').reduce((s,r)=>s + +r.amount,0);
+  const exp = rows.filter(r=>r.type==='expense').reduce((s,r)=>s + +r.amount,0);
+  animateNumber(document.getElementById('stat-income'), inc);
+  animateNumber(document.getElementById('stat-expense'), exp);
+  animateNumber(document.getElementById('stat-balance'), inc-exp);
+
+  const today = new Date().toISOString().slice(0,10);
+  const todayRows = rows.filter(r=>r.date===today);
+  const todayExp  = todayRows.filter(r=>r.type==='expense').reduce((s,r)=>s + +r.amount,0);
+  document.getElementById('b-total').textContent = fmtAmt(exp);
+  document.getElementById('b-today').textContent = fmtAmt(todayExp);
+
+  renderTrendChart(rows, from, to);
+  renderCatBars(rows);
+  renderBudgetWidget(rows);
+  renderMonthlyScore(rows, new Date(year, month, 0).getDate());
+  renderSavingsViz(rows);
+  renderMonthlyChallenges(rows, new Date(year, month, 0).getDate());
+
+  // Today's tasks（用 try/catch 防止崩溃影响后续渲染）
+  try { renderDailyTasks(todayRows); } catch(e) { console.error('renderDailyTasks error:', e); }
+
+  // Recent 8 records
+  const recent = [...rows].sort((a,b)=>b.date.localeCompare(a.date)||b.created_at.localeCompare(a.created_at)).slice(0,8);
+  const ul = document.getElementById('recent-list');
+  ul.innerHTML = recent.length ? recent.map(r=>renderTxItem(r)).join('') : '<li class="empty">本月暂无记录</li>';
+
+  // Load last month for comparison（不阻塞主流程）
+  loadLastMonth();
+}
+
+async function loadLastMonth() {
+  const wrap = document.getElementById('savings-viz-wrap');
+  if (!wrap) return;
+  wrap.innerHTML = '<div style="color:var(--text-3);font-size:12px">加载中…</div>';
+
+  try {
+    // 本月
+    const from1 = `${year}-${String(month).padStart(2,'0')}-01`;
+    const to1   = new Date(year, month, 0).toISOString().slice(0,10);
+    // 上月
+    let lm = month - 1, ly = year;
+    if (lm < 1) { lm = 12; ly--; }
+    const from2 = `${ly}-${String(lm).padStart(2,'0')}-01`;
+    const to2   = new Date(ly, lm, 0).toISOString().slice(0,10);
+
+    console.log('[节省卡片] 查询本月:', from1, '→', to1);
+    console.log('[节省卡片] 查询上月:', from2, '→', to2);
+
+    const [r1, r2] = await Promise.all([
+      db.from('transactions').select('type,amount').gte('date', from1).lte('date', to1),
+      db.from('transactions').select('type,amount').gte('date', from2).lte('date', to2),
+    ]);
+
+    if (r1.error) { console.error('[节省卡片] 本月查询失败:', r1.error); }
+    if (r2.error) { console.error('[节省卡片] 上月查询失败:', r2.error); }
+
+    const thisExp = (r1.data||[]).filter(r=>r.type==='expense').reduce((s,r)=>s + +r.amount, 0);
+    const lastExp = (r2.data||[]).filter(r=>r.type==='expense').reduce((s,r)=>s + +r.amount, 0);
+    const diff    = lastExp - thisExp; // 正 = 节省，负 = 多花
+
+    console.log('[节省卡片] 本月支出:', thisExp, '  上月支出:', lastExp, '  差额:', diff);
+
+    const ITEMS = [
+      { name:'碗经济饭', unit:8  },
+      { name:'次Grab',   unit:15 },
+      { name:'张电影票', unit:20 },
+    ];
+
+    if (lastExp === 0 && thisExp === 0) {
+      wrap.innerHTML = '<div style="color:var(--text-3);font-size:13px;padding:8px 0">上月暂无支出数据</div>';
+      return;
+    }
+
+    if (diff > 0) {
+      const best = ITEMS.map(i=>({...i, count:Math.floor(diff/i.unit)})).filter(i=>i.count>0)[0];
+      wrap.innerHTML = `
+        <div class="savings-viz">
+          <div class="savings-viz-label" style="color:var(--income)">🎉 比上月节省</div>
+          <div class="savings-viz-amt" style="color:var(--income)">${fmtAmt(diff)}</div>
+          ${best ? `<div class="savings-viz-items"><div class="savings-viz-item">≈ <span style="color:var(--income)">${best.count}</span> ${best.name}</div></div>` : ''}
+          <div style="font-size:10px;color:var(--text-3);margin-top:6px">上月 ${fmtAmt(lastExp)} → 本月 ${fmtAmt(thisExp)}</div>
+        </div>`;
+    } else if (diff < 0) {
+      const over = -diff;
+      const best = ITEMS.map(i=>({...i, count:Math.floor(over/i.unit)})).filter(i=>i.count>0)[0];
+      wrap.innerHTML = `
+        <div class="savings-viz" style="background:var(--expense-dim);border-color:rgba(248,113,113,.2)">
+          <div class="savings-viz-label" style="color:var(--expense)">📈 比上月多花</div>
+          <div class="savings-viz-amt" style="color:var(--expense)">${fmtAmt(over)}</div>
+          ${best ? `<div class="savings-viz-items"><div class="savings-viz-item">≈ <span style="color:var(--expense)">${best.count}</span> ${best.name}</div></div>` : ''}
+          <div style="font-size:10px;color:var(--text-3);margin-top:6px">上月 ${fmtAmt(lastExp)} → 本月 ${fmtAmt(thisExp)}</div>
+        </div>`;
+    } else {
+      wrap.innerHTML = '<div style="color:var(--text-3);font-size:13px;padding:8px 0">与上月持平</div>';
+    }
+  } catch (e) {
+    console.error('[节省卡片] 异常:', e);
+    wrap.innerHTML = '<div style="color:var(--text-3);font-size:12px">加载失败，请查看控制台</div>';
+  }
+}
+
+function renderTrendChart(rows, from, to) {
+  const days=[],vals=[];
+  for(let d=new Date(from+'T00:00:00');d<=new Date(to+'T00:00:00');d.setDate(d.getDate()+1)){
+    const ds=d.toISOString().slice(0,10);
+    days.push(d.getDate());
+    vals.push(rows.filter(r=>r.type==='expense'&&r.date===ds).reduce((s,r)=>s + +r.amount,0));
+  }
+  if(trendChart)trendChart.destroy();
+  const ctx=document.getElementById('trend-chart').getContext('2d');
+  trendChart=new Chart(ctx,{
+    type:'line',
+    data:{labels:days,datasets:[{data:vals,fill:true,borderColor:'rgba(255,255,255,.85)',borderWidth:2,pointRadius:0,pointHoverRadius:4,pointBackgroundColor:'#fff',tension:.4,
+      backgroundColor:c=>{const g=c.chart.ctx.createLinearGradient(0,0,0,130);g.addColorStop(0,'rgba(255,255,255,.22)');g.addColorStop(1,'rgba(255,255,255,.01)');return g;}}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtAmt(c.parsed.y)},backgroundColor:'rgba(9,13,28,.9)',borderColor:'rgba(34,211,238,.3)',borderWidth:1}},
+      scales:{
+        x:{grid:{display:false},ticks:{color:'rgba(255,255,255,.35)',font:{size:9},maxTicksLimit:10}},
+        y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'rgba(255,255,255,.35)',font:{size:9},callback:v=>v>0?'RM'+v:''},border:{display:false}}
+      }
+    }
+  });
+}
+
+// ── 餐饮预算小部件（正确计算版）────────────────
+function renderBudgetWidget(rows) {
+  const now  = new Date();
+  const isCurMonth = (year === now.getFullYear() && month === now.getMonth() + 1);
+  const widget = document.getElementById('budget-widget');
+  widget.style.display = isCurMonth ? '' : 'none';
+  if (!isCurMonth) return;
+
+  // 餐饮已花费
+  const spent = rows
+    .filter(r => r.type === 'expense' && r.category === '餐饮')
+    .reduce((s, r) => s + +r.amount, 0);
+
+  // 剩余预算
+  const remain = _budget - spent;
+  const over   = spent > _budget;
+
+  // 剩余天数 = 当月总天数 - 今天日期（不包含今天，正如用户示例：31-23=8）
+  const lastDay  = new Date(year, month, 0).getDate();
+  const todayNum = now.getDate();
+  const daysLeft = Math.max(lastDay - todayNum, 0);
+
+  // 日均花费 = 已花费 ÷ 今天是第几天
+  const avgDaily = todayNum > 0 ? spent / todayNum : 0;
+
+  // 每天可花 = 剩余 ÷ 剩余天数
+  const canDaily = daysLeft > 0 ? Math.max(remain, 0) / daysLeft : 0;
+
+  // 进度条百分比（花费÷预算，最多100%）
+  const pct = Math.min((spent / _budget) * 100, 100);
+
+  // 更新 DOM
+  document.getElementById('bw-spent').textContent        = fmtAmt(spent);
+  document.getElementById('bw-remain').textContent       = fmtAmt(Math.max(remain, 0));
+  document.getElementById('bw-budget-label').textContent = `预算 ${fmtAmt(_budget)}`;
+  document.getElementById('bw-avg').textContent          = fmtAmt(avgDaily);
+  document.getElementById('bw-days').textContent         = daysLeft + ' 天';
+  document.getElementById('bw-daily').textContent        = daysLeft > 0 ? fmtAmt(canDaily) : '月底了';
+  document.getElementById('bw-bar').style.width          = pct + '%';
+
+  // 超支提示
+  const warnEl = document.getElementById('bw-warn');
+  const overEl = document.getElementById('bw-over');
+  if (over) {
+    warnEl.style.display  = '';
+    overEl.textContent    = fmtAmt(spent - _budget);
+    document.getElementById('bw-bar').style.background = 'var(--expense)';
+  } else {
+    warnEl.style.display  = 'none';
+    document.getElementById('bw-bar').style.background = '';
+  }
+}
+
+function editBudgetInline() {
+  const cur = prompt('设定餐饮预算（RM）：', _budget);
+  if (cur === null) return;
+  const val = parseFloat(cur);
+  if (!val || val <= 0) { showToast('请输入有效金额'); return; }
+  db.from('settings').upsert(
+    { key: 'food_budget', value: String(val), updated_at: new Date().toISOString() },
+    { onConflict: 'key' }
+  ).then(({ error }) => {
+    if (!error) { _budget = val; showToast('✅ 预算已更新'); load(); }
+    else showToast('❌ 更新失败');
+  });
+}
+
+function renderCatBars(rows) {
+  const exp=rows.filter(r=>r.type==='expense');
+  const total=exp.reduce((s,r)=>s + +r.amount,0)||1;
+  const map={};
+  exp.forEach(r=>{map[r.category]=(map[r.category]||0) + +r.amount;});
+  const sorted=Object.entries(map).sort((a,b)=>b[1]-a[1]);
+  const wrap=document.getElementById('cat-bars');
+  if(!sorted.length){wrap.innerHTML='<div class="empty" style="padding:12px 0">本月无支出</div>';return;}
+  const maxVal=sorted[0][1];
+  wrap.innerHTML=sorted.map(([cat,amt],i)=>`
+    <div class="cat-bar-item">
+      <div class="cat-bar-label">${escHtml(cat)}</div>
+      <div class="cat-bar-track"><div class="cat-bar-fill" style="width:0%;background:${CAT_COLORS[i%CAT_COLORS.length]}" data-w="${(amt/maxVal*100).toFixed(1)}"></div></div>
+      <div class="cat-bar-meta">${fmtAmt(amt)} <span class="cat-bar-pct">${(amt/total*100).toFixed(0)}%</span></div>
+    </div>`).join('');
+  requestAnimationFrame(()=>{wrap.querySelectorAll('.cat-bar-fill').forEach(el=>{el.style.width=el.dataset.w+'%';});});
+}
+
+function renderMonthlyScore(rows, daysInMonth) {
+  const dineAmt = rows.filter(r=>r.type==='expense'&&r.category==='餐饮').reduce((s,r)=>s + +r.amount,0);
+  const inc     = rows.filter(r=>r.type==='income').reduce((s,r)=>s + +r.amount,0);
+  const exp     = rows.filter(r=>r.type==='expense').reduce((s,r)=>s + +r.amount,0);
+  const savRate = inc>0?(inc-exp)/inc:0;
+  const recDays = new Set(rows.map(r=>r.date)).size;
+  const now     = new Date();
+  const daysPast = (year===now.getFullYear()&&month===now.getMonth()+1)?now.getDate():daysInMonth;
+
+  // ── 餐饮控制（30分）──────────────────────────
+  // 基准 RM1000，花越少分越高，超过=0分
+  let s1;
+  if      (dineAmt > 1000) s1 = 0;
+  else if (dineAmt > 900)  s1 = 15;
+  else if (dineAmt > 800)  s1 = 20;
+  else if (dineAmt > 700)  s1 = 25;
+  else                     s1 = 30;
+
+  // ── 储蓄率（40分）────────────────────────────
+  // 储蓄率 = (收入-支出)/收入
+  let s2;
+  const pct = savRate * 100;
+  if      (pct >= 50) s2 = 40;
+  else if (pct >= 30) s2 = 30;
+  else if (pct >= 20) s2 = 20;
+  else if (pct >= 10) s2 = 10;
+  else                s2 = 0;
+
+  // ── 记账完整度（30分）────────────────────────
+  // 有记账天数 ÷ 本月经过天数 × 30（线性）
+  const s3 = Math.min(30, Math.round((recDays / daysPast) * 30));
+
+  const total = s1 + s2 + s3;
+
+  document.getElementById('score-num').textContent = total;
+
+  // 评级：S财务大师 A理财达人 B稳健理财 C还需努力 D需要改善
+  const GRADES = [
+    [90,'S','财务大师'],
+    [80,'A','理财达人'],
+    [70,'B','稳健理财'],
+    [60,'C','还需努力'],
+    [0, 'D','需要改善'],
+  ];
+  const [,g,gName] = GRADES.find(([min])=>total>=min);
+  const gradeEl = document.getElementById('score-grade');
+  gradeEl.textContent = g; gradeEl.className = 'score-grade '+g;
+
+  document.getElementById('sb-dining').style.width = (s1/30*100)+'%';
+  document.getElementById('sv-dining').textContent = s1;
+  document.getElementById('sb-save').style.width   = (s2/40*100)+'%';
+  document.getElementById('sv-save').textContent   = s2;
+  document.getElementById('sb-rec').style.width    = (s3/30*100)+'%';
+  document.getElementById('sv-rec').textContent    = s3;
+
+  // 与上月对比
+  const key  = `score_${year}_${month}`;
+  const prev = localStorage.getItem(`score_${year}_${month>1?month-1:12}`);
+  if (prev) {
+    const diff = total - parseInt(prev);
+    const cmp  = document.getElementById('score-compare');
+    cmp.innerHTML = diff >= 0
+      ? `<span class="score-arrow-up">▲ ${diff}分</span> 比上月提升`
+      : `<span class="score-arrow-down">▼ ${Math.abs(diff)}分</span> 比上月下降`;
+  }
+  localStorage.setItem(key, total);
+}
+
+function renderSavingsViz(rows) {
+  // Handled by loadLastMonth
+}
+
+function renderMonthlyChallenges(rows, daysInMonth) {
+  const wrap = document.getElementById('challenge-list');
+  wrap.innerHTML = MONTHLY_CHALLENGES.map(ch => {
+    const done = ch.id==='record_all'?ch.check(rows,daysInMonth):ch.check(rows);
+    if(done) {
+      const badge = document.getElementById(ch.badgeId);
+      if(badge){badge.classList.remove('locked');badge.classList.add('earned');}
+    }
+    return `<div class="challenge-item ${done?'done':''}">
+      <span class="challenge-icon">${ch.icon}</span>
+      <div class="challenge-info">
+        <div class="challenge-name">${ch.name}</div>
+        <div class="challenge-desc">${ch.desc}</div>
+      </div>
+      <span class="challenge-status">${done?'✅':''}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderDailyTasks(todayRows) {
+  const today  = new Date().toISOString().slice(0,10);
+  const stored = JSON.parse(localStorage.getItem('daily_tasks') || '{}');
+  let taskData; // 只存可序列化字段 {id,text,xp,emoji,done}
+
+  if (stored.date === today && Array.isArray(stored.tasks)) {
+    taskData = stored.tasks;
+  } else {
+    // 每天生成3个随机任务（只存序列化字段，不存函数）
+    const shuffled = [...ALL_TASKS].sort(() => Math.random() - .5);
+    taskData = shuffled.slice(0, 3).map(t => ({
+      id: t.id, text: t.text, xp: t.xp, emoji: t.emoji, done: false
+    }));
+    localStorage.setItem('daily_tasks', JSON.stringify({ date: today, tasks: taskData }));
+  }
+
+  // 恢复 check 函数（从 ALL_TASKS 里重新匹配）并检查完成状态
+  let changed = false;
+  taskData = taskData.map(st => {
+    const def    = ALL_TASKS.find(a => a.id === st.id);
+    const nowDone = def ? def.check(todayRows) : st.done;
+    if (nowDone && !st.done) { showXpFloat(st.xp); changed = true; }
+    return { id: st.id, text: st.text, xp: st.xp, emoji: st.emoji, done: nowDone };
+  });
+
+  if (changed) {
+    localStorage.setItem('daily_tasks', JSON.stringify({ date: today, tasks: taskData }));
+  }
+
+  const wrap = document.getElementById('task-list');
+  if (!wrap) return;
+  wrap.innerHTML = taskData.map(t => `
+    <div class="task-item ${t.done ? 'done' : ''}" onclick="toggleTask('${t.id}')">
+      <div class="task-check">${t.done ? '✓' : ''}</div>
+      <span class="task-emoji">${t.emoji}</span>
+      <div class="task-info"><div class="task-text">${t.text}</div></div>
+      <span class="task-xp">+${t.xp} XP</span>
+    </div>`).join('');
+}
+
+// 手动点击打勾切换任务完成状态
+function toggleTask(id) {
+  const today  = new Date().toISOString().slice(0,10);
+  const stored = JSON.parse(localStorage.getItem('daily_tasks') || '{}');
+  if (stored.date !== today || !Array.isArray(stored.tasks)) return;
+
+  stored.tasks = stored.tasks.map(t =>
+    t.id === id ? { ...t, done: !t.done } : t
+  );
+  localStorage.setItem('daily_tasks', JSON.stringify(stored));
+
+  const wrap = document.getElementById('task-list');
+  if (!wrap) return;
+  wrap.innerHTML = stored.tasks.map(t => `
+    <div class="task-item ${t.done ? 'done' : ''}" onclick="toggleTask('${t.id}')">
+      <div class="task-check">${t.done ? '✓' : ''}</div>
+      <span class="task-emoji">${t.emoji}</span>
+      <div class="task-info"><div class="task-text">${t.text}</div></div>
+      <span class="task-xp">+${t.xp} XP</span>
+    </div>`).join('');
+}
+
+async function loadGamification() {
+  // 总存款 = 从 accounts 表读取用户手动设置的银行卡余额（与资产页面数据一致）
+  const row = await getBankBalance();
+  const savings = row ? parseFloat(row.balance) : 0;
+
+  const pct = Math.min(savings / 100000, 1);
+  setMasked('savings-amt', savings);
+  document.getElementById('boss-hp').style.width = ((1 - pct) * 100).toFixed(1) + '%';
+  setMasked('boss-dmg', pct, 'boss-dmg');
+  setMasked('boss-hp-left', savings, 'boss-left');
+
+  // 里程碑检测
+  MILESTONES.forEach(m => {
+    const key = `milestone_${m}`;
+    if (savings >= m && !localStorage.getItem(key)) {
+      localStorage.setItem(key, '1');
+      setTimeout(() => { triggerMilestone(m); }, 800);
+    }
+  });
+
+  // 等级计算（阈值与 mochi.js 对齐）
+  let lvIdx = 0;
+  for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) {
+    if (savings >= LEVEL_THRESHOLDS[i]) { lvIdx = i; break; }
+  }
+  lvIdx = Math.min(lvIdx, LEVEL_THRESHOLDS.length - 2); // 最高 index 9（Lv.50）
+
+  const lvNum  = LEVEL_NUMBERS[lvIdx];  // 显示的等级数字，如 10
+  const lvName = LEVEL_NAMES[lvIdx];    // 称号，如「江湖游侠」
+  const prevT  = LEVEL_THRESHOLDS[lvIdx];
+  const nextT  = LEVEL_THRESHOLDS[Math.min(lvIdx + 1, LEVEL_THRESHOLDS.length - 1)];
+  const xpPct  = lvIdx >= LEVEL_THRESHOLDS.length - 2
+    ? 100
+    : ((savings - prevT) / (nextT - prevT) * 100).toFixed(1);
+
+  document.getElementById('lv-badge').textContent = `Lv.${lvNum}`;
+  document.getElementById('lv-name').textContent  = lvName;
+  document.getElementById('lv-next').textContent  = lvIdx >= LEVEL_THRESHOLDS.length - 2
+    ? '🎉 已满级！龙魂归位！'
+    : `再存 ${fmtAmt(nextT - savings)} 升 Lv.${LEVEL_NUMBERS[lvIdx + 1]}`;
+  document.getElementById('lv-xp').style.width = xpPct + '%';
+
+  // Streak
+  const {data:txD}=await db.from('transactions').select('date').order('date',{ascending:false}).limit(90);
+  const uniq=[...new Set((txD||[]).map(r=>r.date))].sort().reverse();
+  let streak=0; const now=new Date();
+  for(let i=0;i<uniq.length;i++){
+    const exp=new Date(now);exp.setDate(now.getDate()-i);
+    if(uniq[i]===exp.toISOString().slice(0,10))streak++;else break;
+  }
+  document.getElementById('streak-count').textContent=streak;
+
+  // Base achievements
+  const mFrom=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
+  const mTo=new Date(now.getFullYear(),now.getMonth()+1,0).toISOString().slice(0,10);
+  const {data:mr}=await db.from('transactions').select('*').gte('date',mFrom).lte('date',mTo);
+  const rows=mr||[];
+  const dine=rows.filter(r=>r.type==='expense'&&r.category==='餐饮').reduce((s,r)=>s + +r.amount,0);
+  const totInc=rows.filter(r=>r.type==='income').reduce((s,r)=>s + +r.amount,0);
+  const totExp=rows.filter(r=>r.type==='expense').reduce((s,r)=>s + +r.amount,0);
+  const zeroDayExists=[...new Set(rows.map(r=>r.date))].some(d=>!rows.filter(r=>r.date===d&&r.type==='expense').length);
+  const badges=[dine>0&&dine<_budget*.5, streak>=30, zeroDayExists, totInc>0&&(totInc-totExp)/totInc>=.3];
+  document.querySelectorAll('#achievements .badge').forEach((el,i)=>{
+    if(i<4&&badges[i]){el.classList.add('earned');el.classList.remove('locked');}
+  });
+}
+
+// ── 里程碑庆祝 ──────────────────────────────────
+function triggerMilestone(amount) {
+  // Confetti
+  const colors=['#22D3EE','#A78BFA','#4ADE80','#FBBF24','#F87171','#FB923C'];
+  for(let i=0;i<80;i++){
+    const el=document.createElement('div');
+    el.className='confetti-piece';
+    el.style.cssText=`left:${Math.random()*100}%;background:${colors[Math.floor(Math.random()*colors.length)]};animation-delay:${Math.random()*.6}s;animation-duration:${1.8+Math.random()*.8}s;width:${5+Math.random()*7}px;height:${5+Math.random()*7}px;border-radius:${Math.random()>.5?'50%':'2px'};`;
+    document.body.appendChild(el);
+    el.addEventListener('animationend',()=>el.remove());
+  }
+  // Banner
+  const banner=document.createElement('div');
+  banner.className='milestone-banner';
+  banner.innerHTML=`<div class="milestone-emoji">🎉</div><div class="milestone-text">恭喜突破 ${fmtAmt(amount)}！</div>`;
+  document.body.appendChild(banner);
+  setTimeout(()=>banner.remove(),4500);
+}
+
+// 数字滚动动画（遮罩感知版）
+function animateNumber(el,to,dur=700){
+  el.dataset.rawAmt = to;
+  if (isAmtHidden()) { el.textContent = 'RM ••••••'; return; }
+  const from=parseFloat(el.textContent.replace(/[^0-9.-]/g,''))||0;
+  const start=Date.now();
+  const tick=()=>{
+    if (isAmtHidden()) { el.textContent = 'RM ••••••'; return; }
+    const p=Math.min((Date.now()-start)/dur,1),e=1-Math.pow(1-p,3);
+    el.textContent=fmtAmt(from+(to-from)*e);
+    if(p<1)requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+window.__reload=()=>{load();loadGamification();};
+init();
+
+// Tooltip — fixed 定位跳出父层 overflow:hidden，JS 动态算坐标
+(function () {
+  const tip  = document.querySelector('.score-tooltip');
+  const icon = tip?.previousElementSibling;
+  if (!icon || !tip) return;
+  icon.addEventListener('mouseenter', () => {
+    tip.style.display = 'block';
+    const r  = icon.getBoundingClientRect();
+    const tw = tip.offsetWidth;
+    const th = tip.offsetHeight;
+    let left = r.left + r.width / 2 - tw / 2;
+    let top  = r.top - th - 10;
+    // 边界保护：防止超出视口
+    left = Math.max(8, Math.min(left, window.innerWidth  - tw - 8));
+    if (top < 8) top = r.bottom + 8; // 上方放不下就改到下方
+    tip.style.left = left + 'px';
+    tip.style.top  = top  + 'px';
+  });
+  icon.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+})();
+</script>
+</body>
+</html>

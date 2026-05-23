@@ -1,0 +1,118 @@
+
+/* ══════════════════════════════════════════════════
+   VITALITY-STYLE SIDEBAR — TAB CONNECTING TO CONTENT
+   Active item uses content-area bg → seamless merge
+══════════════════════════════════════════════════ */
+
+/* 1. Sidebar becomes a floating teal card */
+.sidebar {
+  --sb: #0B2637;          /* sidebar solid color */
+  background: #0B2637;
+  border-right: none;
+  border-radius: 0 24px 24px 0;
+  overflow: visible;       /* allow corner pseudos to paint outside */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: 8px 0 32px rgba(0,0,0,.4), 0 0 0 1px rgba(34,211,238,.08);
+  z-index: 110;
+}
+
+/* Keep sidebar dark even in light mode */
+[data-theme="light"] .sidebar {
+  background: #0C2A3E;
+  --sb: #0C2A3E;
+  box-shadow: 8px 0 32px rgba(0,0,0,.25), 0 0 0 1px rgba(34,211,238,.12);
+}
+
+/* 2. Logo on teal bg */
+.sidebar-logo { border-bottom: 1px solid rgba(34,211,238,.1); }
+.logo-name { color: #7dd3fc; }
+.logo-icon { box-shadow: 0 0 16px rgba(34,211,238,.2); }
+
+/* 3. Sidebar nav: remove right padding so items reach the edge */
+.sidebar-nav {
+  padding: 14px 0 0 10px;   /* NO right padding */
+  gap: 3px;
+}
+
+/* 4. All nav items: dimmed cyan text, no background, extend to right edge */
+.sidebar-nav a {
+  color: rgba(34,211,238,.45);
+  background: transparent;
+  border-radius: 12px 0 0 12px;    /* left rounded, right straight */
+  padding: 11px 14px 11px 14px;
+  font-size: 14px; font-weight: 500;
+  transition: color .2s, background .2s;
+  margin-right: 0;
+}
+
+.sidebar-nav a svg { opacity: .55; transition: opacity .2s; }
+
+/* Hover: gentle glow */
+.sidebar-nav a:hover {
+  color: rgba(34,211,238,.8);
+  background: rgba(34,211,238,.07);
+  text-shadow: 0 0 18px rgba(34,211,238,.2);
+}
+.sidebar-nav a:hover svg { opacity: .85; }
+
+/* 5. ACTIVE ITEM: content-area background → seamless merge with right content */
+.sidebar-nav a.active {
+  background: var(--bg);         /* same as content area = invisible right edge */
+  color: var(--cyan);
+  font-weight: 600;
+  border-radius: 12px 0 0 12px;  /* left rounded ONLY */
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 0 20px rgba(34,211,238,.3);
+  /* Cyan left-edge glow bar */
+  box-shadow: -3px 0 0 0 var(--cyan) inset;
+}
+.sidebar-nav a.active svg { opacity: 1; }
+
+/* 6. CORNER CUTOUTS — replace old ::before left-bar with corner pseudos */
+
+/* Top-right corner: covers the square corner of the active item with sidebar color,
+   leaving a rounded cutout that reveals the active bg beneath */
+.sidebar-nav a.active::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;        /* inside active item, top-right corner */
+  left: auto;              /* override old 'left:0' */
+  transform: none;         /* override old 'translateY(-50%)' */
+  width: 12px; height: 12px;
+  background: #0B2637;     /* sidebar color fills the corner */
+  border-radius: 0 0 0 12px; /* bottom-left rounded → reveals active bg below-left */
+  z-index: 3;
+}
+
+/* Bottom-right corner */
+.sidebar-nav a.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0; right: 0;
+  width: 12px; height: 12px;
+  background: #0B2637;     /* sidebar color */
+  border-radius: 12px 0 0 0; /* top-left rounded → reveals active bg above-left */
+  z-index: 3;
+}
+
+/* Light mode: corner pseudos match the light-mode sidebar color */
+[data-theme="light"] .sidebar-nav a.active::before,
+[data-theme="light"] .sidebar-nav a.active::after {
+  background: #0C2A3E;
+}
+
+/* 7. Footer theme toggle on teal bg */
+.sidebar-footer { border-top: 1px solid rgba(34,211,238,.1); }
+.theme-toggle {
+  background: rgba(34,211,238,.06);
+  border-color: rgba(34,211,238,.12);
+  color: rgba(34,211,238,.55);
+}
+.theme-toggle:hover {
+  background: rgba(34,211,238,.12);
+  border-color: rgba(34,211,238,.3);
+  color: var(--cyan);
+  box-shadow: 0 0 16px rgba(34,211,238,.08);
+}

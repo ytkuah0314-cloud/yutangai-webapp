@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>年度总览 · YuTangAi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🐟</div>
+    <span class="logo-name">YuTangAi</span>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="add.html">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="3.5" width="14" height="11" rx="2"/><path d="M5.5 3.5V2M11.5 3.5V2M1.5 7h14M6 11h2m3 0h-2m0 0v-2m0 2v2"/></svg>
+      资产
+    </a>
+    <a href="index.html">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="10" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="10" width="6" height="6" rx="1.5"/><rect x="10" y="10" width="6" height="6" rx="1.5"/></svg>
+      仪表板
+    </a>
+    <a href="calendar.html">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1.5" y="3" width="14" height="12.5" rx="2"/><line x1="1.5" y1="7" x2="15.5" y2="7"/><line x1="5.5" y1="1" x2="5.5" y2="5"/><line x1="11.5" y1="1" x2="11.5" y2="5"/></svg>
+      月度
+    </a>
+    <a href="year.html">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="3" width="14" height="12.5" rx="2"/><line x1="1.5" y1="7" x2="15.5" y2="7"/><line x1="5.5" y1="1" x2="5.5" y2="5"/><line x1="11.5" y1="1" x2="11.5" y2="5"/><line x1="4" y1="10.5" x2="9.5" y2="10.5"/><line x1="4" y1="13" x2="13" y2="13"/></svg>
+      年度
+    </a>
+    <a href="records.html">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="3" y1="4.5" x2="14" y2="4.5"/><line x1="3" y1="8.5" x2="14" y2="8.5"/><line x1="3" y1="12.5" x2="10" y2="12.5"/></svg>
+      流水
+    </a>
+    <a href="annual.html">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,13 6.5,8 10,11 15,5"/><polyline points="11,5 15,5 15,9"/></svg>
+      薪水
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="theme-toggle" onclick="toggleTheme()">
+      <span class="toggle-icon" id="theme-icon">🌙</span>
+      <span class="toggle-label" id="theme-label">浅色模式</span>
+    </button>
+  </div>
+</aside>
+
+<nav class="bottom-nav">
+  <a href="add.html"><span class="nav-icon-wrap">💳</span>资产</a>
+  <a href="index.html"><span class="nav-icon-wrap">📊</span>仪表板</a>
+  <a href="calendar.html"><span class="nav-icon-wrap">📅</span>月度</a>
+  <a href="year.html"><span class="nav-icon-wrap">📆</span>年度</a>
+  <a href="records.html"><span class="nav-icon-wrap">📋</span>流水</a>
+  <a href="annual.html"><span class="nav-icon-wrap">📈</span>薪水</a>
+</nav>
+
+<main class="main">
+
+  <!-- ══ 薪水分配比例 ══════════════════════════════ -->
+  <div class="card" style="padding:20px;margin-bottom:14px">
+    <h2 style="margin-bottom:14px">薪水分配比例</h2>
+
+    <!-- 本月薪水输入 -->
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--card-2);border-radius:var(--r-sm);border:1px solid var(--border);margin-bottom:16px">
+      <span style="font-size:13px;color:var(--text-2);white-space:nowrap">本月薪水 RM</span>
+      <input type="number" id="sal-income" placeholder="0.00" min="0" step="0.01" oninput="calcAlloc()"
+             style="flex:1;padding:7px 10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);font-family:var(--f-mono);font-size:17px;font-weight:700;outline:none;min-width:0">
+      <button onclick="calcAlloc()" style="padding:7px 14px;background:linear-gradient(135deg,var(--cyan),var(--violet));color:#fff;border:none;border-radius:var(--r-sm);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap">计算</button>
+    </div>
+
+    <!-- 三行分配 -->
+    <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:14px">
+
+      <!-- 储蓄/投资 -->
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <span style="font-size:15px">💚</span>
+          <span style="font-size:13px;font-weight:600;color:var(--income);flex:1">储蓄/投资</span>
+          <input type="number" id="pct-save" value="30" min="0" max="100" step="1" oninput="calcAlloc()"
+                 style="width:54px;padding:5px 6px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--f-mono);font-size:14px;text-align:center;outline:none">
+          <span style="font-size:12px;color:var(--text-3)">%</span>
+          <span style="font-family:var(--f-mono);font-size:14px;font-weight:600;color:var(--income);min-width:90px;text-align:right" id="amt-save">RM 0.00</span>
+        </div>
+        <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+          <div id="bar-save" style="height:100%;border-radius:3px;background:var(--income);transition:width .4s ease;width:30%"></div>
+        </div>
+      </div>
+
+      <!-- 必要支出 -->
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <span style="font-size:15px">💙</span>
+          <span style="font-size:13px;font-weight:600;color:var(--cyan);flex:1">必要支出</span>
+          <input type="number" id="pct-need" value="50" min="0" max="100" step="1" oninput="calcAlloc()"
+                 style="width:54px;padding:5px 6px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--f-mono);font-size:14px;text-align:center;outline:none">
+          <span style="font-size:12px;color:var(--text-3)">%</span>
+          <span style="font-family:var(--f-mono);font-size:14px;font-weight:600;color:var(--cyan);min-width:90px;text-align:right" id="amt-need">RM 0.00</span>
+        </div>
+        <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+          <div id="bar-need" style="height:100%;border-radius:3px;background:var(--cyan);transition:width .4s ease;width:50%"></div>
+        </div>
+      </div>
+
+      <!-- 生活品质 -->
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <span style="font-size:15px">💗</span>
+          <span style="font-size:13px;font-weight:600;color:var(--violet);flex:1">生活品质</span>
+          <input type="number" id="pct-life" value="20" min="0" max="100" step="1" oninput="calcAlloc()"
+                 style="width:54px;padding:5px 6px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--f-mono);font-size:14px;text-align:center;outline:none">
+          <span style="font-size:12px;color:var(--text-3)">%</span>
+          <span style="font-family:var(--f-mono);font-size:14px;font-weight:600;color:var(--violet);min-width:90px;text-align:right" id="amt-life">RM 0.00</span>
+        </div>
+        <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+          <div id="bar-life" style="height:100%;border-radius:3px;background:var(--violet);transition:width .4s ease;width:20%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 总计行 -->
+    <div id="alloc-total-row" style="display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:var(--r-sm);background:var(--card-2);border:1px solid var(--border);transition:border-color .2s">
+      <span style="font-size:13px;color:var(--text-2)">总计</span>
+      <span style="font-family:var(--f-mono);font-size:15px;font-weight:700" id="alloc-total-pct">100%</span>
+      <span id="alloc-status" style="font-size:14px">✅</span>
+      <span id="alloc-warn" style="font-size:11px;color:var(--expense);display:none">三项必须合计100%</span>
+    </div>
+  </div>
+
+  <div class="month-nav">
+    <button onclick="changeYear(-1)">‹</button>
+    <div class="month-label" id="year-label">—</div>
+    <button onclick="changeYear(1)">›</button>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-card income">
+      <div class="label">全年收入</div>
+      <div class="value" id="tot-income">—</div>
+    </div>
+    <div class="stat-card expense">
+      <div class="label">全年支出</div>
+      <div class="value" id="tot-expense">—</div>
+    </div>
+    <div class="stat-card balance">
+      <div class="label">全年结余</div>
+      <div class="value" id="tot-balance">—</div>
+    </div>
+  </div>
+
+  <!-- 月度收支横轴条形图 -->
+  <div class="card" style="padding:20px">
+    <h2>全年收支对比</h2>
+    <div style="display:flex;gap:16px;margin-bottom:14px;font-size:12px">
+      <span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:8px;background:var(--income);border-radius:2px;display:inline-block"></span>收入</span>
+      <span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:8px;background:var(--expense);border-radius:2px;display:inline-block"></span>支出</span>
+    </div>
+    <div id="annual-bars"></div>
+  </div>
+
+  <!-- ══ 愿望清单 ══════════════════════════════════ -->
+  <h2 style="margin-top:4px">🎯 愿望清单</h2>
+  <div class="card" style="padding:20px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <span style="font-size:12px;color:var(--text-3)">虚拟存钱罐 · 追踪你的购物目标</span>
+      <button onclick="showWishModal()" class="wish-add-btn">+ 添加</button>
+    </div>
+    <div id="wish-list-annual">
+      <div class="skeleton skeleton-line" style="height:80px;border-radius:10px"></div>
+    </div>
+  </div>
+
+  <!-- 负债供款追踪 -->
+  <h2 style="margin-top:4px">负债供款追踪</h2>
+  <div class="card" style="padding:20px">
+    <div id="debt-total-row" style="display:none" class="debt-total-row" style="margin-bottom:14px">
+      <span class="debt-total-label">每月总供款：</span>
+      <span class="debt-total-amt" id="debt-total-amt">RM 0.00</span>
+    </div>
+    <div class="debt-list" id="debt-list">
+      <div class="skeleton skeleton-line" style="height:70px"></div>
+    </div>
+    <h2 style="margin-top:14px;margin-bottom:10px">新增负债</h2>
+    <div class="add-debt-form">
+      <input type="text"   id="d-name"   placeholder="负债名称（房租/分期…）">
+      <input type="number" id="d-monthly" placeholder="每月供款 RM" min="0" step="0.01">
+      <input type="number" id="d-total"   placeholder="总期数（可选）" min="0">
+      <input type="number" id="d-paid"    placeholder="已付期数" min="0">
+      <input type="date"   id="d-start"   style="grid-column:1/-1">
+      <button class="add-debt-btn" onclick="addDebt()">+ 添加负债项目</button>
+    </div>
+  </div>
+</main>
+
+<!-- ══ 添加/编辑愿望 弹窗 ══ -->
+<div id="wish-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:200;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeWishModal()">
+  <div id="wish-modal-box" style="background:var(--sidebar-bg);border:1px solid var(--border-2);border-radius:var(--r-lg);padding:24px;width:100%;max-width:420px;animation:slideUp .25s cubic-bezier(.16,1,.3,1) both">
+    <h3 id="wm-title" style="font-family:var(--f-display);font-size:17px;color:var(--text);margin-bottom:18px">添加愿望</h3>
+
+    <div class="wish-form-group">
+      <label class="wish-form-label">Emoji</label>
+      <input type="text" id="wm-emoji" class="wish-form-input" placeholder="🎯" maxlength="4" style="width:70px">
+      <div class="emoji-quick">
+        <button onclick="document.getElementById('wm-emoji').value='🎮'">🎮</button>
+        <button onclick="document.getElementById('wm-emoji').value='✈️'">✈️</button>
+        <button onclick="document.getElementById('wm-emoji').value='👟'">👟</button>
+        <button onclick="document.getElementById('wm-emoji').value='💻'">💻</button>
+        <button onclick="document.getElementById('wm-emoji').value='📱'">📱</button>
+        <button onclick="document.getElementById('wm-emoji').value='🎧'">🎧</button>
+        <button onclick="document.getElementById('wm-emoji').value='🏠'">🏠</button>
+        <button onclick="document.getElementById('wm-emoji').value='🚗'">🚗</button>
+        <button onclick="document.getElementById('wm-emoji').value='💍'">💍</button>
+        <button onclick="document.getElementById('wm-emoji').value='📷'">📷</button>
+      </div>
+    </div>
+
+    <div class="wish-form-group">
+      <label class="wish-form-label">愿望名称</label>
+      <input type="text" id="wm-name" class="wish-form-input" placeholder="例：PS5、机票、新手机…" maxlength="40">
+    </div>
+    <div class="wish-form-group">
+      <label class="wish-form-label">目标价格（RM）</label>
+      <input type="number" id="wm-price" class="wish-form-input" placeholder="0.00" min="0" step="0.01">
+    </div>
+    <div class="wish-form-group">
+      <label class="wish-form-label">初始分配金额（RM，可填 0）</label>
+      <input type="number" id="wm-alloc" class="wish-form-input" placeholder="0.00" min="0" step="0.01">
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:20px;justify-content:flex-end">
+      <button onclick="closeWishModal()" style="padding:10px 18px;border:1px solid var(--border);background:transparent;color:var(--text-2);border-radius:var(--r-sm);font-family:var(--f-body);font-size:13px;cursor:pointer">取消</button>
+      <button onclick="saveWish()" style="padding:10px 20px;background:linear-gradient(135deg,var(--cyan),var(--violet));color:#fff;border:none;border-radius:var(--r-sm);font-family:var(--f-body);font-size:13px;font-weight:700;cursor:pointer">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 追加存款 弹窗 ══ -->
+<div id="deposit-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:200;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeDeposit()">
+  <div id="deposit-modal-box" style="background:var(--sidebar-bg);border:1px solid var(--border-2);border-radius:var(--r-lg);padding:24px;width:100%;max-width:360px;animation:slideUp .25s cubic-bezier(.16,1,.3,1) both">
+    <h3 style="font-family:var(--f-display);font-size:17px;color:var(--text);margin-bottom:8px">+ 追加存款</h3>
+    <p id="dep-wish-name" style="font-size:13px;color:var(--text-3);margin-bottom:18px"></p>
+    <div class="wish-form-group">
+      <label class="wish-form-label">追加金额（RM）</label>
+      <input type="number" id="dep-amount" class="wish-form-input" placeholder="0.00" min="0" step="0.01"
+             onkeydown="if(event.key==='Enter')saveDeposit()">
+    </div>
+    <div style="display:flex;gap:8px;margin-top:20px;justify-content:flex-end">
+      <button onclick="closeDeposit()" style="padding:10px 18px;border:1px solid var(--border);background:transparent;color:var(--text-2);border-radius:var(--r-sm);font-family:var(--f-body);font-size:13px;cursor:pointer">取消</button>
+      <button onclick="saveDeposit()" style="padding:10px 20px;background:linear-gradient(135deg,var(--cyan),var(--violet));color:#fff;border:none;border-radius:var(--r-sm);font-family:var(--f-body);font-size:13px;font-weight:700;cursor:pointer">确认追加</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script src="app.js"></script>
+<script src="modal.js"></script>
+<script>
+let year;
+
+function init() {
+  year = new Date().getFullYear();
+  load();
+}
+
+function changeYear(delta) {
+  year += delta;
+  load();
+}
+
+async function load() {
+  document.getElementById('year-label').textContent = `${year}年`;
+  const from = `${year}-01-01`;
+  const to   = `${year}-12-31`;
+
+  const { data, error } = await db.from('transactions').select('date,type,amount')
+    .gte('date', from).lte('date', to);
+  if (error) { showToast('❌ 加载失败：' + error.message); return; }
+
+  const rows = data || [];
+
+  const months = Array.from({ length: 12 }, (_, i) => ({
+    m: i + 1, income: 0, expense: 0
+  }));
+
+  rows.forEach(r => {
+    const m = parseInt(r.date.slice(5, 7)) - 1;
+    if (r.type === 'income')  months[m].income  += +r.amount;
+    if (r.type === 'expense') months[m].expense += +r.amount;
+  });
+
+  const totInc = months.reduce((s, m) => s + m.income,  0);
+  const totExp = months.reduce((s, m) => s + m.expense, 0);
+  const totBal = totInc - totExp;
+
+  document.getElementById('tot-income').textContent  = fmtAmt(totInc);
+  document.getElementById('tot-expense').textContent = fmtAmt(totExp);
+  document.getElementById('tot-balance').textContent = fmtAmt(totBal);
+
+  // 横轴条形图
+  const maxVal = Math.max(...months.map(m=>Math.max(m.income,m.expense)),1);
+  const MONTH_NAMES = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  const wrap = document.getElementById('annual-bars');
+  wrap.innerHTML = months.map((m,i) => `
+    <div class="annual-bar-item">
+      <div class="annual-bar-month">${MONTH_NAMES[i]}</div>
+      <div class="annual-bar-tracks">
+        <div class="annual-bar-track"><div class="annual-bar-fill-income" style="width:0%" data-w="${(m.income/maxVal*100).toFixed(1)}"></div></div>
+        <div class="annual-bar-track"><div class="annual-bar-fill-expense" style="width:0%" data-w="${(m.expense/maxVal*100).toFixed(1)}"></div></div>
+      </div>
+      <div class="annual-bar-vals">
+        <div style="color:var(--income)">${m.income?fmtAmt(m.income):'—'}</div>
+        <div style="color:var(--expense)">${m.expense?fmtAmt(m.expense):'—'}</div>
+      </div>
+    </div>`).join('');
+  requestAnimationFrame(()=>{
+    wrap.querySelectorAll('[data-w]').forEach(el=>{ el.style.width=el.dataset.w+'%'; });
+  });
+}
+
+init();
+loadDebts();
+loadWishList();
+initSalaryAlloc();
+
+// ── 薪水分配比例 ─────────────────────────────────
+function initSalaryAlloc() {
+  const now = new Date();
+  const key = `salary_alloc_${now.getFullYear()}_${now.getMonth()+1}`;
+  const saved = JSON.parse(localStorage.getItem(key) || '{}');
+  if (saved.income !== undefined) document.getElementById('sal-income').value = saved.income;
+  if (saved.save   !== undefined) document.getElementById('pct-save').value   = saved.save;
+  if (saved.need   !== undefined) document.getElementById('pct-need').value   = saved.need;
+  if (saved.life   !== undefined) document.getElementById('pct-life').value   = saved.life;
+  calcAlloc();
+}
+
+function calcAlloc() {
+  const income = parseFloat(document.getElementById('sal-income').value) || 0;
+  const pSave  = parseFloat(document.getElementById('pct-save').value)  || 0;
+  const pNeed  = parseFloat(document.getElementById('pct-need').value)  || 0;
+  const pLife  = parseFloat(document.getElementById('pct-life').value)  || 0;
+  const total  = pSave + pNeed + pLife;
+  const valid  = Math.abs(total - 100) < 0.5;
+
+  document.getElementById('amt-save').textContent = fmtAmt(income * pSave / 100);
+  document.getElementById('amt-need').textContent = fmtAmt(income * pNeed / 100);
+  document.getElementById('amt-life').textContent = fmtAmt(income * pLife / 100);
+
+  document.getElementById('bar-save').style.width = Math.min(pSave, 100) + '%';
+  document.getElementById('bar-need').style.width = Math.min(pNeed, 100) + '%';
+  document.getElementById('bar-life').style.width = Math.min(pLife, 100) + '%';
+
+  const pctEl   = document.getElementById('alloc-total-pct');
+  const totRow  = document.getElementById('alloc-total-row');
+  const warnEl  = document.getElementById('alloc-warn');
+  const statEl  = document.getElementById('alloc-status');
+
+  pctEl.textContent  = total.toFixed(0) + '%';
+  statEl.textContent = valid ? '✅' : '⚠️';
+  warnEl.style.display    = valid ? 'none' : '';
+  pctEl.style.color       = valid ? 'var(--income)' : 'var(--expense)';
+  totRow.style.borderColor = valid ? 'var(--border)' : 'rgba(248,113,113,.4)';
+
+  if (valid) {
+    const now = new Date();
+    const key = `salary_alloc_${now.getFullYear()}_${now.getMonth()+1}`;
+    localStorage.setItem(key, JSON.stringify({
+      income: document.getElementById('sal-income').value,
+      save: pSave, need: pNeed, life: pLife
+    }));
+  }
+}
+
+// ── 负债追踪 ────────────────────────────────────
+async function loadDebts() {
+  const { data, error } = await db.from('debts').select('*').order('created_at',{ascending:true});
+  const wrap = document.getElementById('debt-list');
+  if (error) { wrap.innerHTML = '<div style="color:var(--text-3);font-size:12px">请先建立 debts 表</div>'; return; }
+  const debts = data || [];
+
+  if (!debts.length) { wrap.innerHTML = '<div class="empty" style="padding:12px 0">暂无负债记录</div>'; return; }
+
+  const totalMonthly = debts.reduce((s,d)=>s + +d.monthly_amt,0);
+  document.getElementById('debt-total-amt').textContent = fmtAmt(totalMonthly);
+  document.getElementById('debt-total-row').style.display = 'flex';
+
+  wrap.innerHTML = debts.map(d => {
+    const total  = d.total_terms || 0;
+    const paid   = d.paid_terms  || 0;
+    const pct    = total > 0 ? (paid / total * 100).toFixed(0) : 0;
+    const remain = total > 0 ? total - paid : null;
+    const finDate = remain && d.start_date ? (() => {
+      const dt = new Date(d.start_date);
+      dt.setMonth(dt.getMonth() + total);
+      return dt.toLocaleDateString('zh-CN',{year:'numeric',month:'long'});
+    })() : null;
+
+    return `
+      <div class="debt-item">
+        <div class="debt-header">
+          <span class="debt-name">${escHtml(d.name)}</span>
+          <span class="debt-monthly">${fmtAmt(d.monthly_amt)}/月</span>
+          <button class="delete-btn" onclick="deleteDebt('${escHtml(d.id)}')">🗑</button>
+        </div>
+        ${total > 0 ? `
+        <div class="debt-bar"><div class="debt-bar-fill" style="width:${pct}%"></div></div>
+        <div class="debt-meta">
+          <span>${paid}/${total} 期 · 已还 ${pct}%</span>
+          <span>${finDate ? '预计 '+finDate+' 还清' : ''}</span>
+        </div>` : '<div class="debt-meta"><span>长期供款</span></div>'}
+      </div>`;
+  }).join('');
+}
+
+async function addDebt() {
+  const name    = document.getElementById('d-name').value.trim();
+  const monthly = parseFloat(document.getElementById('d-monthly').value);
+  const total   = parseInt(document.getElementById('d-total').value)  || null;
+  const paid    = parseInt(document.getElementById('d-paid').value)   || 0;
+  const start   = document.getElementById('d-start').value || null;
+
+  if (!name || !monthly || monthly <= 0) { showToast('请填写名称和月供'); return; }
+
+  const { error } = await db.from('debts').insert({
+    name, monthly_amt: monthly, total_terms: total, paid_terms: paid, start_date: start
+  });
+  if (error) { showToast('❌ ' + error.message); return; }
+  ['d-name','d-monthly','d-total','d-paid','d-start'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  showToast('✅ 已添加');
+  loadDebts();
+}
+
+async function deleteDebt(id) {
+  if (!confirm('删除这项负债？')) return;
+  await db.from('debts').delete().eq('id', id);
+  showToast('已删除');
+  loadDebts();
+}
+
+// ── 愿望清单 ─────────────────────────────────────
+let _editWishId = null;
+let _depositWishId = null;
+let _wishCache = {};
+
+async function loadWishList() {
+  const { data, error } = await db.from('wishes').select('*')
+    .order('done', { ascending: true })
+    .order('created_at', { ascending: true });
+
+  const wrap = document.getElementById('wish-list-annual');
+  if (error) {
+    wrap.innerHTML = '<div style="color:var(--text-3);font-size:12px;padding:12px 0">请先在 Supabase 建立 wishes 表（含 allocated_amount 等字段），详见说明。</div>';
+    return;
+  }
+
+  const wishes = data || [];
+  _wishCache = {};
+  wishes.forEach(w => { _wishCache[w.id] = w; });
+
+  if (!wishes.length) {
+    wrap.innerHTML = '<div class="empty" style="padding:24px 0">还没有愿望 · 点右上角「+ 添加」开始吧！</div>';
+    return;
+  }
+
+  wrap.innerHTML = wishes.map(w => renderWishCard(w)).join('');
+
+  requestAnimationFrame(() => {
+    wrap.querySelectorAll('[data-w]').forEach(el => { el.style.width = el.dataset.w + '%'; });
+  });
+}
+
+function renderWishCard(w) {
+  const target    = +w.price || 0;
+  const allocated = +w.allocated_amount || 0;
+  const pct       = target > 0 ? Math.min(allocated / target * 100, 100) : 0;
+  const remain    = Math.max(target - allocated, 0);
+  const done      = w.done;
+
+  // 预计月数
+  const created = new Date(w.created_at);
+  const monthsOld = Math.max((Date.now() - created) / (30 * 24 * 3600 * 1000), 0);
+  let estimate = '';
+  if (pct >= 100) {
+    estimate = '<span style="color:var(--income);font-weight:600;font-size:12px">🎉 存够了！可以买了！</span>';
+  } else if (monthsOld >= 1 && allocated > 0) {
+    const speed = allocated / monthsOld;
+    const needed = Math.ceil(remain / speed);
+    estimate = `📅 按当前速度，约需 <strong>${needed}</strong> 个月`;
+  } else if (allocated > 0) {
+    estimate = '📅 积累 1 个月数据后显示预计时间';
+  } else {
+    estimate = '💡 追加存款后显示预计时间';
+  }
+
+  return `
+    <div class="wish-full-item ${done ? 'completed' : ''}">
+      <div class="wish-full-header">
+        <span class="wish-full-emoji">${escHtml(w.icon || '🎯')}</span>
+        <div class="wish-full-info">
+          <div class="wish-full-name">${escHtml(w.name)}</div>
+          <div class="wish-full-target">目标 ${fmtAmt(target)}</div>
+        </div>
+        <div class="wish-full-actions">
+          ${!done ? `<button onclick="showEditWish('${escHtml(w.id)}')" class="wish-icon-btn" title="编辑">✏️</button>` : ''}
+          <button onclick="deleteWishAnnual('${escHtml(w.id)}')" class="wish-icon-btn" title="删除">🗑</button>
+        </div>
+      </div>
+
+      <div class="wish-full-progress">
+        <div class="wish-full-bar-wrap">
+          <div class="wish-full-bar-fill ${pct >= 100 ? 'complete' : ''}" style="width:0%" data-w="${pct.toFixed(1)}"></div>
+        </div>
+        <span class="wish-full-pct">${pct.toFixed(0)}%</span>
+      </div>
+
+      <div class="wish-full-amounts">
+        <span>已分配 <strong>${fmtAmt(allocated)}</strong></span>
+        ${remain > 0 ? `<span>还差 <strong style="color:var(--expense)">${fmtAmt(remain)}</strong></span>` : ''}
+      </div>
+
+      <div class="wish-full-estimate">${estimate}</div>
+
+      ${!done ? `
+      <div class="wish-full-btns">
+        <button onclick="showDeposit('${escHtml(w.id)}')" class="wish-deposit-btn">+ 追加存款</button>
+        <button onclick="markWishDone('${escHtml(w.id)}')" class="wish-purchased-btn">✅ 已购买</button>
+      </div>` : `<div style="font-size:11px;color:var(--income);text-align:right;margin-top:4px">✅ 已达成</div>`}
+    </div>`;
+}
+
+function showWishModal(id) {
+  _editWishId = id || null;
+  document.getElementById('wm-title').textContent = id ? '编辑愿望' : '添加愿望';
+  document.getElementById('wm-emoji').value = '';
+  document.getElementById('wm-name').value  = '';
+  document.getElementById('wm-price').value = '';
+  document.getElementById('wm-alloc').value = '';
+
+  if (id && _wishCache[id]) {
+    const w = _wishCache[id];
+    document.getElementById('wm-emoji').value = w.icon || '🎯';
+    document.getElementById('wm-name').value  = w.name;
+    document.getElementById('wm-price').value = w.price;
+    document.getElementById('wm-alloc').value = w.allocated_amount || 0;
+  }
+
+  const ov = document.getElementById('wish-overlay');
+  ov.style.display = 'flex';
+  setTimeout(() => document.getElementById('wm-name').focus(), 50);
+}
+
+function showEditWish(id) { showWishModal(id); }
+
+function closeWishModal() {
+  document.getElementById('wish-overlay').style.display = 'none';
+  _editWishId = null;
+}
+
+async function saveWish() {
+  const emoji = document.getElementById('wm-emoji').value.trim() || '🎯';
+  const name  = document.getElementById('wm-name').value.trim();
+  const price = parseFloat(document.getElementById('wm-price').value);
+  const alloc = parseFloat(document.getElementById('wm-alloc').value) || 0;
+
+  if (!name)              { showToast('请填写愿望名称'); return; }
+  if (!price || price<=0) { showToast('请填写目标价格'); return; }
+
+  let error;
+  if (_editWishId) {
+    ({ error } = await db.from('wishes')
+      .update({ icon: emoji, name, price })
+      .eq('id', _editWishId));
+  } else {
+    ({ error } = await db.from('wishes')
+      .insert({ icon: emoji, name, price, done: false }));
+  }
+  if (error) { showToast('❌ ' + error.message); return; }
+  showToast(_editWishId ? '✅ 已保存' : '✅ 已添加！');
+  closeWishModal();
+  loadWishList();
+}
+
+function showDeposit(id) {
+  _depositWishId = id;
+  const w = _wishCache[id];
+  document.getElementById('dep-wish-name').textContent = w ? `为「${w.name}」追加存款` : '追加存款';
+  document.getElementById('dep-amount').value = '';
+  const ov = document.getElementById('deposit-overlay');
+  ov.style.display = 'flex';
+  setTimeout(() => document.getElementById('dep-amount').focus(), 50);
+}
+
+function closeDeposit() {
+  document.getElementById('deposit-overlay').style.display = 'none';
+  _depositWishId = null;
+}
+
+async function saveDeposit() {
+  const amt = parseFloat(document.getElementById('dep-amount').value);
+  if (!amt || amt <= 0) { showToast('请输入有效金额'); return; }
+
+  const current = +(_wishCache[_depositWishId]?.allocated_amount || 0);
+  const { error } = await db.from('wishes')
+    .update({ allocated_amount: current + amt })
+    .eq('id', _depositWishId);
+
+  if (error) {
+    if (error.message && error.message.includes('allocated_amount')) {
+      showToast('⚠️ 请在 Supabase 给 wishes 表添加 allocated_amount 列后使用此功能');
+    } else {
+      showToast('❌ ' + error.message);
+    }
+    return;
+  }
+  showToast(`✅ 已追加 ${fmtAmt(amt)}！`);
+  closeDeposit();
+  loadWishList();
+}
+
+async function markWishDone(id) {
+  const { error } = await db.from('wishes').update({ done: true }).eq('id', id);
+  if (error) { showToast('❌ ' + error.message); return; }
+  showToast('🎉 恭喜达成目标！');
+  loadWishList();
+}
+
+async function deleteWishAnnual(id) {
+  if (!confirm('删除这个愿望？')) return;
+  const { error } = await db.from('wishes').delete().eq('id', id);
+  if (error) { showToast('❌ ' + error.message); return; }
+  showToast('已删除');
+  loadWishList();
+}
+</script>
+</body>
+</html>

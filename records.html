@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>流水 · YuTangAi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🐟</div>
+    <span class="logo-name">YuTangAi</span>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="add.html">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="3.5" width="14" height="11" rx="2"/><path d="M5.5 3.5V2M11.5 3.5V2M1.5 7h14M6 11h2m3 0h-2m0 0v-2m0 2v2"/></svg>
+      资产
+    </a>
+    <a href="index.html">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="10" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="10" width="6" height="6" rx="1.5"/><rect x="10" y="10" width="6" height="6" rx="1.5"/></svg>
+      仪表板
+    </a>
+    <a href="calendar.html">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1.5" y="3" width="14" height="12.5" rx="2"/><line x1="1.5" y1="7" x2="15.5" y2="7"/><line x1="5.5" y1="1" x2="5.5" y2="5"/><line x1="11.5" y1="1" x2="11.5" y2="5"/></svg>
+      月度
+    </a>
+    <a href="year.html">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="3" width="14" height="12.5" rx="2"/><line x1="1.5" y1="7" x2="15.5" y2="7"/><line x1="5.5" y1="1" x2="5.5" y2="5"/><line x1="11.5" y1="1" x2="11.5" y2="5"/><line x1="4" y1="10.5" x2="9.5" y2="10.5"/><line x1="4" y1="13" x2="13" y2="13"/></svg>
+      年度
+    </a>
+    <a href="records.html">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="3" y1="4.5" x2="14" y2="4.5"/><line x1="3" y1="8.5" x2="14" y2="8.5"/><line x1="3" y1="12.5" x2="10" y2="12.5"/></svg>
+      流水
+    </a>
+    <a href="annual.html">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,13 6.5,8 10,11 15,5"/><polyline points="11,5 15,5 15,9"/></svg>
+      薪水
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="theme-toggle" onclick="toggleTheme()">
+      <span class="toggle-icon" id="theme-icon">🌙</span>
+      <span class="toggle-label" id="theme-label">浅色模式</span>
+    </button>
+  </div>
+</aside>
+
+<nav class="bottom-nav">
+  <a href="add.html"><span class="nav-icon-wrap">💳</span>资产</a>
+  <a href="index.html"><span class="nav-icon-wrap">📊</span>仪表板</a>
+  <a href="calendar.html"><span class="nav-icon-wrap">📅</span>月度</a>
+  <a href="year.html"><span class="nav-icon-wrap">📆</span>年度</a>
+  <a href="records.html"><span class="nav-icon-wrap">📋</span>流水</a>
+  <a href="annual.html"><span class="nav-icon-wrap">📈</span>薪水</a>
+</nav>
+
+<main class="main">
+
+  <!-- 标题行 + 导出按钮 -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+    <h1 style="margin:0">交易流水</h1>
+    <button class="btn-export-open" onclick="openExport()">📤 导出</button>
+  </div>
+
+  <!-- 搜索栏 -->
+  <div class="records-search-wrap">
+    <svg class="records-search-icon" width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="6.5" cy="6.5" r="4.5"/><line x1="10" y1="10" x2="14" y2="14"/></svg>
+    <input type="text" class="records-search-input" id="r-search"
+      placeholder="搜索备注、类别、账户、金额…"
+      oninput="onSearchInput()">
+    <button class="records-search-clear" id="r-search-clear" onclick="clearSearch()">×</button>
+  </div>
+
+  <!-- 筛选栏 -->
+  <div class="filter-bar" style="flex-wrap:wrap;gap:6px;margin-bottom:14px">
+    <button class="month-nav-btn" onclick="changeMonth(-1)">‹</button>
+    <div class="filter-month-label" id="r-month-label">—</div>
+    <button class="month-nav-btn" onclick="changeMonth(1)">›</button>
+
+    <select class="filter-cat" id="r-cat-filter" onchange="applyFilters()">
+      <option value="">全部类别</option>
+    </select>
+
+    <select class="filter-cat" id="r-acc-filter" onchange="applyFilters()">
+      <option value="">全部账户</option>
+      <option value="银行卡">🏦 银行卡</option>
+      <option value="TouchNGo">📱 TouchNGo</option>
+      <option value="信用卡">💳 信用卡</option>
+    </select>
+
+    <select class="filter-cat" id="r-type-filter" onchange="applyFilters()">
+      <option value="">全部类型</option>
+      <option value="income">💚 收入</option>
+      <option value="expense">❤️ 支出</option>
+    </select>
+
+    <input type="date" class="filter-date" id="r-date-from" onchange="onDateRangeChange()" title="开始日期">
+    <span style="color:var(--text-3);font-size:12px;flex-shrink:0">～</span>
+    <input type="date" class="filter-date" id="r-date-to" onchange="onDateRangeChange()" title="结束日期">
+    <button onclick="clearDateRange()" title="清除日期范围"
+      style="padding:6px 8px;background:var(--card);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text-3);font-size:11px;cursor:pointer;flex-shrink:0;transition:color .15s"
+      onmouseover="this.style.color='var(--expense)'" onmouseout="this.style.color='var(--text-3)'">清除</button>
+  </div>
+
+  <!-- 账户使用比例图 -->
+  <div class="card" style="padding:18px 20px;margin-bottom:14px" id="account-bars-card">
+    <h2>账户使用（当前范围支出）</h2>
+    <div id="account-bars"></div>
+  </div>
+
+  <!-- 搜索结果摘要 -->
+  <div class="records-summary" id="r-summary"></div>
+
+  <!-- 记录数 + 列表 -->
+  <div class="records-count" id="r-count"></div>
+
+  <div class="card" style="padding:0 22px">
+    <ul class="tx-list" id="r-list"><li class="empty">加载中…</li></ul>
+  </div>
+
+  <!-- 统计合计 -->
+  <div class="records-total">
+    <span><span class="rt-label">收入</span><span class="rt-val income" id="r-income">—</span></span>
+    <span><span class="rt-label">支出</span><span class="rt-val expense" id="r-expense">—</span></span>
+    <span><span class="rt-label">结余</span><span class="rt-val" id="r-balance">—</span></span>
+  </div>
+
+</main>
+
+<!-- ══ 导出面板 ══ -->
+<div class="export-overlay" id="export-overlay" onclick="closeExport()">
+  <div class="export-panel" onclick="event.stopPropagation()">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <h3 style="margin:0;font-family:var(--f-display);font-size:17px;font-weight:700">导出记录</h3>
+      <button onclick="closeExport()"
+        style="background:none;border:none;color:var(--text-2);font-size:24px;cursor:pointer;padding:0;line-height:1">×</button>
+    </div>
+
+    <div style="font-size:12px;color:var(--text-2);margin-bottom:8px">导出范围</div>
+    <div class="export-range-grid">
+      <button class="export-range-btn active" data-range="month" onclick="setExportRange(this)">本月</button>
+      <button class="export-range-btn" data-range="year" onclick="setExportRange(this)">本年</button>
+      <button class="export-range-btn" data-range="all"  onclick="setExportRange(this)">全部记录</button>
+      <button class="export-range-btn" data-range="custom" onclick="setExportRange(this)">自定义范围</button>
+    </div>
+
+    <div id="export-custom-dates" style="display:none;margin-bottom:14px">
+      <div style="font-size:12px;color:var(--text-2);margin-bottom:6px">自定义日期范围</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="date" class="filter-date" id="exp-from" style="flex:1;width:auto">
+        <span style="color:var(--text-3)">～</span>
+        <input type="date" class="filter-date" id="exp-to"   style="flex:1;width:auto">
+      </div>
+    </div>
+
+    <div id="export-file-preview" style="font-size:12px;color:var(--text-3);padding:10px 12px;background:var(--card);border-radius:var(--r-sm);margin-bottom:16px">
+      文件名：YuTangAi_记账_…csv
+    </div>
+
+    <button class="export-confirm-btn" id="export-confirm-btn" onclick="doExport()">📥 确认导出</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script src="app.js"></script>
+<script src="modal.js"></script>
+<script>
+let year, month, allRows = [], exportRange = 'month';
+
+/* ── 初始化 ── */
+function init() {
+  const now = new Date();
+  year  = now.getFullYear();
+  month = now.getMonth() + 1;
+
+  const sel = document.getElementById('r-cat-filter');
+  EXPENSE_CATEGORIES.concat(INCOME_CATEGORIES).forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c; opt.textContent = c;
+    sel.appendChild(opt);
+  });
+
+  load();
+}
+
+/* ── 月份切换 ── */
+function changeMonth(delta) {
+  month += delta;
+  if (month > 12) { month = 1; year++; }
+  if (month < 1)  { month = 12; year--; }
+  clearDateRange(false);
+  load();
+}
+
+/* ── 日期范围变化 ── */
+function onDateRangeChange() {
+  const f = document.getElementById('r-date-from').value;
+  const t = document.getElementById('r-date-to').value;
+  if (f && t) load();
+}
+
+function clearDateRange(doLoad = true) {
+  document.getElementById('r-date-from').value = '';
+  document.getElementById('r-date-to').value   = '';
+  if (doLoad) load();
+}
+
+/* ── 主加载函数 ── */
+async function load() {
+  const dateFrom = document.getElementById('r-date-from').value;
+  const dateTo   = document.getElementById('r-date-to').value;
+
+  let from, to;
+  if (dateFrom && dateTo) {
+    from = dateFrom; to = dateTo;
+    document.getElementById('r-month-label').textContent = dateFrom + ' ～ ' + dateTo;
+  } else {
+    from = `${year}-${String(month).padStart(2,'0')}-01`;
+    to   = new Date(year, month, 0).toISOString().slice(0,10);
+    document.getElementById('r-month-label').textContent = fmtMonth(year, month);
+  }
+
+  document.getElementById('r-list').innerHTML = '<li class="empty">加载中…</li>';
+
+  const { data, error } = await db.from('transactions').select('*')
+    .gte('date', from).lte('date', to)
+    .order('date',       { ascending: false })
+    .order('created_at', { ascending: false });
+
+  if (error) { showToast('❌ 加载失败：' + error.message); return; }
+  allRows = data || [];
+  renderAccountBars(allRows);
+  applyFilters();
+}
+
+/* ── 搜索输入 ── */
+function onSearchInput() {
+  const val = document.getElementById('r-search').value;
+  const clearBtn = document.getElementById('r-search-clear');
+  clearBtn.classList.toggle('show', val.length > 0);
+  applyFilters();
+}
+
+function clearSearch() {
+  document.getElementById('r-search').value = '';
+  document.getElementById('r-search-clear').classList.remove('show');
+  applyFilters();
+}
+
+/* ── 应用所有筛选（客户端） ── */
+const ACC_NAME_MAP = { '其他方式':'信用卡', '信用卡':'信用卡', '银行卡':'银行卡', 'TouchNGo':'TouchNGo' };
+
+function applyFilters() {
+  const cat    = document.getElementById('r-cat-filter').value;
+  const acc    = document.getElementById('r-acc-filter').value;
+  const type   = document.getElementById('r-type-filter').value;
+  const search = document.getElementById('r-search').value.trim().toLowerCase();
+
+  let rows = allRows;
+  if (cat)    rows = rows.filter(r => r.category === cat);
+  if (acc)    rows = rows.filter(r => (ACC_NAME_MAP[r.account] || r.account) === acc);
+  if (type)   rows = rows.filter(r => r.type === type);
+  if (search) rows = rows.filter(r =>
+    (r.notes    || '').toLowerCase().includes(search) ||
+    (r.category || '').toLowerCase().includes(search) ||
+    (r.account  || '').toLowerCase().includes(search) ||
+    String(r.amount).includes(search)
+  );
+
+  /* 统计 */
+  const inc = rows.filter(r => r.type === 'income').reduce((s,r) => s + +r.amount, 0);
+  const exp = rows.filter(r => r.type === 'expense').reduce((s,r) => s + +r.amount, 0);
+  const bal = inc - exp;
+
+  /* 摘要条 */
+  const hasAnyFilter = cat || acc || type || search;
+  const summary = document.getElementById('r-summary');
+  if (hasAnyFilter) {
+    summary.classList.add('show');
+    summary.innerHTML = `找到 <strong>${rows.length}</strong> 笔记录 &nbsp;·&nbsp; ` +
+      `支出 <strong style="color:var(--expense)">${fmtAmt(exp)}</strong> &nbsp;·&nbsp; ` +
+      `收入 <strong style="color:var(--income)">${fmtAmt(inc)}</strong>`;
+  } else {
+    summary.classList.remove('show');
+  }
+
+  document.getElementById('r-count').textContent = `共 ${rows.length} 笔`;
+  document.getElementById('r-income').textContent  = fmtAmt(inc);
+  document.getElementById('r-expense').textContent = fmtAmt(exp);
+  const balEl = document.getElementById('r-balance');
+  balEl.textContent  = fmtAmt(bal);
+  balEl.className    = 'rt-val ' + (bal >= 0 ? 'income' : 'expense');
+
+  const ul = document.getElementById('r-list');
+  if (!rows.length) { ul.innerHTML = '<li class="empty">暂无匹配记录</li>'; return; }
+  ul.innerHTML = rows.map(r => renderTxItem(r)).join('');
+}
+
+/* ── 账户使用图（始终用全量数据）── */
+const ACC_ICON = { '信用卡':'💳', '银行卡':'🏦', 'TouchNGo':'📱' };
+
+function renderAccountBars(rows) {
+  const exp    = rows.filter(r => r.type === 'expense');
+  const accMap = { '银行卡': 0, 'TouchNGo': 0, '信用卡': 0 };
+  exp.forEach(r => {
+    const n = ACC_NAME_MAP[r.account] || r.account;
+    accMap[n] = (accMap[n] || 0) + +r.amount;
+  });
+
+  const sorted = Object.entries(accMap).sort((a, b) => b[1] - a[1]);
+  const maxVal = sorted[0][1] || 1;
+  const wrap   = document.getElementById('account-bars');
+  wrap.innerHTML = sorted.map(([acc, amt]) => {
+    const icon  = ACC_ICON[acc] || '💳';
+    const pct   = (amt / maxVal * 100).toFixed(1);
+    return `<div class="account-bar-item">
+      <div class="account-bar-label" style="text-align:right;white-space:nowrap">${icon} ${escHtml(acc)}</div>
+      <div class="account-bar-track"><div class="account-bar-fill" style="width:0%" data-w="${pct}"></div></div>
+      <div class="account-bar-amt">${amt > 0 ? fmtAmt(amt) : '—'}</div>
+    </div>`;
+  }).join('');
+  requestAnimationFrame(() => {
+    wrap.querySelectorAll('[data-w]').forEach(el => { el.style.width = el.dataset.w + '%'; });
+  });
+}
+
+/* ══ 导出面板 ══ */
+function openExport() {
+  exportRange = 'month';
+  document.querySelectorAll('.export-range-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('[data-range="month"]').classList.add('active');
+  document.getElementById('export-custom-dates').style.display = 'none';
+  updateExportPreview();
+  document.getElementById('export-overlay').classList.add('open');
+}
+function closeExport() {
+  document.getElementById('export-overlay').classList.remove('open');
+}
+
+function setExportRange(btn) {
+  document.querySelectorAll('.export-range-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  exportRange = btn.dataset.range;
+  document.getElementById('export-custom-dates').style.display = exportRange === 'custom' ? 'block' : 'none';
+  updateExportPreview();
+}
+
+function updateExportPreview() {
+  let name;
+  if      (exportRange === 'month')  name = `YuTangAi_记账_${year}年${month}月`;
+  else if (exportRange === 'year')   name = `YuTangAi_记账_${year}年全年`;
+  else if (exportRange === 'all')    name = `YuTangAi_记账_全部`;
+  else                               name = `YuTangAi_记账_自定义日期`;
+  document.getElementById('export-file-preview').textContent = '文件名：' + name + '.csv';
+}
+
+async function doExport() {
+  const btn = document.getElementById('export-confirm-btn');
+  btn.textContent = '⏳ 导出中…';
+  btn.disabled    = true;
+
+  let from, to, filename;
+  if (exportRange === 'month') {
+    from     = `${year}-${String(month).padStart(2,'0')}-01`;
+    to       = new Date(year, month, 0).toISOString().slice(0,10);
+    filename = `YuTangAi_记账_${year}年${month}月.csv`;
+  } else if (exportRange === 'year') {
+    from     = `${year}-01-01`;
+    to       = `${year}-12-31`;
+    filename = `YuTangAi_记账_${year}年全年.csv`;
+  } else if (exportRange === 'all') {
+    from     = '2000-01-01';
+    to       = '2099-12-31';
+    filename = `YuTangAi_记账_全部.csv`;
+  } else {
+    from = document.getElementById('exp-from').value;
+    to   = document.getElementById('exp-to').value;
+    if (!from || !to) {
+      showToast('⚠️ 请选择日期范围');
+      btn.textContent = '📥 确认导出'; btn.disabled = false;
+      return;
+    }
+    filename = `YuTangAi_记账_${from}_${to}.csv`;
+  }
+
+  const { data, error } = await db.from('transactions').select('*')
+    .gte('date', from).lte('date', to)
+    .order('date', { ascending: true });
+
+  btn.textContent = '📥 确认导出';
+  btn.disabled    = false;
+
+  if (error) { showToast('❌ 导出失败：' + error.message); return; }
+  const rows = data || [];
+  if (!rows.length) { showToast('⚠️ 该范围没有记录'); return; }
+
+  const headers = ['日期', '收支', '类别', '金额', '账户', '备注'];
+  const lines   = [headers.join(',')];
+  rows.forEach(r => {
+    lines.push([
+      r.date,
+      r.type === 'income' ? '收入' : '支出',
+      r.category,
+      (+r.amount).toFixed(2),
+      r.account,
+      '"' + (r.notes || '').replace(/"/g, '""') + '"'
+    ].join(','));
+  });
+
+  const blob = new Blob(['﻿' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+
+  closeExport();
+  showToast(`✅ 已导出 ${rows.length} 笔记录`);
+}
+
+window.__reload = load;
+init();
+</script>
+</body>
+</html>
