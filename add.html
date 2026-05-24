@@ -69,7 +69,10 @@
     <div class="balance-header">
       <div>
         <div class="balance-label"><span class="balance-indicator"></span>银行卡余额</div>
-        <div class="balance-amount" id="bank-balance-amount">—</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="balance-amount" id="bank-balance-amount">RM ••••••</div>
+          <button id="bank-eye-btn" onclick="toggleBankVisibility()" style="background:none;border:none;cursor:pointer;padding:2px;color:var(--text-3);line-height:1;opacity:.75;flex-shrink:0" title="显示/隐藏余额"></button>
+        </div>
       </div>
       <button class="balance-edit-btn" onclick="showBalanceEdit()">✏️ 调整</button>
     </div>
@@ -179,25 +182,49 @@ function renderCategories() {
   document.getElementById('f-category').innerHTML = cats.map(c => `<option>${c}</option>`).join('');
 }
 
+// ── 银行卡余额 本地显示/隐藏 ────────────────────
+const _EYE_OPEN  = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+const _EYE_CLOSE = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+let _bankHidden = localStorage.getItem('yutang-bank-hidden') === '1';
+
+function _refreshBankDisplay() {
+  const el  = document.getElementById('bank-balance-amount');
+  const btn = document.getElementById('bank-eye-btn');
+  if (!el) return;
+  const raw = parseFloat(el.dataset.savingsRaw) || 0;
+  el.textContent = (_bankHidden || isAmtHidden()) ? 'RM ••••••' : fmtAmt(raw);
+  if (btn) btn.innerHTML = _bankHidden ? _EYE_CLOSE : _EYE_OPEN;
+}
+
+function toggleBankVisibility() {
+  _bankHidden = !_bankHidden;
+  localStorage.setItem('yutang-bank-hidden', _bankHidden ? '1' : '0');
+  _refreshBankDisplay();
+}
+
 // ── 银行卡余额显示 ──────────────────────────────
 async function loadBalance() {
   const row = await getBankBalance();
   const el  = document.getElementById('bank-balance-amount');
   const upd = document.getElementById('bank-balance-updated');
   if (row) {
-    setMasked(el, row.balance);
+    el.dataset.savingsRaw = row.balance;
+    _refreshBankDisplay();
     const d = new Date(row.updated_at);
     upd.textContent = `上次更新：${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
   } else {
-    el.textContent  = 'RM 0.00';
+    el.textContent  = 'RM ••••••';
     upd.textContent = '尚未设定初始余额';
   }
 }
 
+// 让全局遮罩切换也能刷新银行卡余额显示
+(function(){const _orig=window.applyAmtMask;window.applyAmtMask=function(){_orig&&_orig();_refreshBankDisplay();};})();
+
 function showBalanceEdit() {
   const inp    = document.getElementById('balance-input');
   const amtEl  = document.getElementById('bank-balance-amount');
-  const num    = parseFloat(amtEl.dataset.rawAmt) || 0;
+  const num    = parseFloat(amtEl.dataset.savingsRaw) || 0;
   inp.value = num.toFixed(2);
   document.getElementById('balance-edit-wrap').style.display = '';
   inp.focus(); inp.select();
@@ -263,6 +290,8 @@ async function loadRecent() {
 document.getElementById('f-date').value = new Date().toISOString().slice(0, 10);
 renderCategories();
 window.__reload = loadRecent;
+// 页面加载时立即设置眼睛图标
+(()=>{const btn=document.getElementById('bank-eye-btn');if(btn)btn.innerHTML=_bankHidden?_EYE_CLOSE:_EYE_OPEN;})();
 loadBalance();
 loadRecent();
 loadWishes();

@@ -730,7 +730,7 @@ function _refreshSavingsDisplay() {
   const btn = document.getElementById('savings-eye-btn');
   if (!el) return;
   const raw = parseFloat(el.dataset.savingsRaw) || 0;
-  el.textContent = _savingsHidden ? 'RM ••••••' : fmtAmt(raw);
+  el.textContent = (_savingsHidden || isAmtHidden()) ? 'RM ••••••' : fmtAmt(raw);
   if (btn) btn.innerHTML = _savingsHidden ? _EYE_CLOSE : _EYE_OPEN;
 }
 
@@ -758,6 +758,9 @@ function animateNumber(el,to,dur=700){
 window.__reload=()=>{load();loadGamification();};
 // 页面加载时立即设置眼睛图标（数据未到之前也能显示）
 (()=>{const btn=document.getElementById('savings-eye-btn');if(btn)btn.innerHTML=_savingsHidden?_EYE_CLOSE:_EYE_OPEN;})();
+
+// 让全局遮罩切换（applyAmtMask）也能刷新存款显示，解决两套系统不同步的问题
+(function(){const _orig=window.applyAmtMask;window.applyAmtMask=function(){_orig&&_orig();_refreshSavingsDisplay();};})();
 init();
 
 // Tooltip — fixed 定位跳出父层 overflow:hidden，JS 动态算坐标
