@@ -994,6 +994,9 @@ h2 {
 .add-debt-btn { grid-column: 1/-1; padding: 10px; background: linear-gradient(135deg,var(--expense),var(--amber)); color: #fff; border: none; border-radius: var(--r-sm); font-family: var(--f-body); font-size: 13px; font-weight: 600; cursor: pointer; }
 .delete-btn { background: none; border: none; color: var(--text-dim,var(--text-3)); cursor: pointer; font-size: 14px; padding: 2px 6px; border-radius: 4px; }
 .delete-btn:hover { color: var(--expense); background: var(--expense-dim); }
+.debt-pay-btn { margin-top: 10px; width: 100%; padding: 7px; border: none; border-radius: var(--r-sm); background: var(--cyan-dim); color: var(--cyan); font-size: 12px; font-weight: 600; cursor: pointer; transition: opacity .15s; }
+.debt-pay-btn:hover { opacity: .8; }
+.debt-paid-badge { margin-top: 10px; text-align: center; font-size: 12px; color: var(--income); font-weight: 600; }
 
 /* == CONFETTI + MILESTONE == */
 .confetti-piece { position: fixed; top: -10px; z-index: 9999; pointer-events: none; animation: confettiFall 2.2s ease-out forwards; }

@@ -400,6 +400,7 @@ async function loadDebts() {
       return dt.toLocaleDateString('zh-CN',{year:'numeric',month:'long'});
     })() : null;
 
+    const donePaying = total > 0 && paid >= total;
     return `
       <div class="debt-item">
         <div class="debt-header">
@@ -413,6 +414,10 @@ async function loadDebts() {
           <span>${paid}/${total} 期 · 已还 ${pct}%</span>
           <span>${finDate ? '预计 '+finDate+' 还清' : ''}</span>
         </div>` : '<div class="debt-meta"><span>长期供款</span></div>'}
+        ${donePaying
+          ? `<div class="debt-paid-badge">🎉 已还清</div>`
+          : `<button class="debt-pay-btn" onclick="markDebtPaid('${escHtml(d.id)}', ${paid}, ${total})">✓ 本月已供</button>`
+        }
       </div>`;
   }).join('');
 }
@@ -441,6 +446,15 @@ async function deleteDebt(id) {
   if (!confirm('删除这项负债？')) return;
   await db.from('debts').delete().eq('id', id);
   showToast('已删除');
+  loadDebts();
+}
+
+async function markDebtPaid(id, currentPaid, totalTerms) {
+  const newPaid = currentPaid + 1;
+  const { error } = await db.from('debts').update({ paid_terms: newPaid }).eq('id', id);
+  if (error) { showToast('❌ 更新失败'); return; }
+  const done = totalTerms > 0 && newPaid >= totalTerms;
+  showToast(done ? '🎉 恭喜还清！' : `✅ 已记录第 ${newPaid} 期供款`);
   loadDebts();
 }
 
