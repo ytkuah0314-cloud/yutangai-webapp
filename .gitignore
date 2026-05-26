@@ -36,3 +36,8 @@ build/
 # 临时文件
 *.tmp
 *.bak
+
+# Claude Code
+.agents/
+.claude/
+skills-lock.json
